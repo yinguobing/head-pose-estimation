@@ -154,3 +154,20 @@ def get_tf_session(inference_pb_file=MARK_MODEL):
 
 
 MARK_GRAPH, MARK_SESS = get_tf_session(inference_pb_file=MARK_MODEL)
+
+
+def detect_marks(image_np, sess, detection_graph):
+    """Detect marks from image"""
+    # Get result tensor by its name.
+    logits_tensor = detection_graph.get_tensor_by_name('logits/BiasAdd:0')
+
+    # Actual detection.
+    predictions = sess.run(
+        logits_tensor,
+        feed_dict={'input_image_tensor:0': image_np})
+
+    # Convert predictions to landmarks.
+    marks = np.array(predictions).flatten()
+    marks = np.reshape(marks, (-1, 2))
+
+    return marks
