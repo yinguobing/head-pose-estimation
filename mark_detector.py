@@ -1,6 +1,9 @@
 """Human facial landmark detector based on Convulutional Neural Network."""
 import os
 
+import numpy as np
+import tensorflow as tf
+
 import cv2
 
 CWD_PATH = os.getcwd()
@@ -134,3 +137,20 @@ def extract_cnn_facebox(image):
             return facebox
 
     return None
+
+
+def get_tf_session(inference_pb_file=MARK_MODEL):
+    """Get a TensorFlow session ready to do landmark detection"""
+    # Load a (frozen) Tensorflow model into memory.
+    detection_graph = tf.Graph()
+    with detection_graph.as_default():
+        od_graph_def = tf.GraphDef()
+        with tf.gfile.GFile(inference_pb_file, 'rb') as fid:
+            serialized_graph = fid.read()
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name='')
+
+        return detection_graph, tf.Session(graph=detection_graph)
+
+
+MARK_GRAPH, MARK_SESS = get_tf_session(inference_pb_file=MARK_MODEL)
