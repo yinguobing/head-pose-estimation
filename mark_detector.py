@@ -115,3 +115,22 @@ def box_in_image(box, image):
     rows = image.shape[0]
     cols = image.shape[1]
     return box[0] >= 0 and box[1] >= 0 and box[2] <= cols and box[3] <= rows
+
+
+def extract_cnn_facebox(image):
+    """Extract face area from image."""
+    _, raw_boxes = get_faceboxes(image=image, threshold=0.9)
+
+    for box in raw_boxes:
+        # Move box down.
+        diff_height_width = (box[3] - box[1]) - (box[2] - box[0])
+        offset_y = int(abs(diff_height_width / 2))
+        box_moved = move_box(box, [0, offset_y])
+
+        # Make box square.
+        facebox = get_square_box(box_moved)
+
+        if box_in_image(facebox, image):
+            return facebox
+
+    return None
