@@ -12,6 +12,7 @@ FACE_NET = cv2.dnn.readNetFromCaffe(DNN_PROTOTXT, DNN_MODEL)
 CNN_INPUT_SIZE = 128
 MARK_MODEL = 'assets/frozen_inference_graph.pb'
 
+
 def get_faceboxes(image=None, threshold=0.5):
     """
     Get the bounding box of faces in image using dnn.
@@ -73,4 +74,37 @@ def move_box(box, offset):
     top_y = box[1] + offset[1]
     right_x = box[2] + offset[0]
     bottom_y = box[3] + offset[1]
+    return [left_x, top_y, right_x, bottom_y]
+
+
+def get_square_box(box):
+    """Get a square box out of the given box, by expanding it."""
+    left_x = box[0]
+    top_y = box[1]
+    right_x = box[2]
+    bottom_y = box[3]
+
+    box_width = right_x - left_x
+    box_height = bottom_y - top_y
+
+    # Check if box is already a square. If not, make it a square.
+    diff = box_height - box_width
+    delta = int(abs(diff) / 2)
+
+    if diff == 0:                   # Already a square.
+        return box
+    elif diff > 0:                  # Height > width, a slim box.
+        left_x -= delta
+        right_x += delta
+        if diff % 2 == 1:
+            right_x += 1
+    else:                           # Width > height, a short box.
+        top_y -= delta
+        bottom_y += delta
+        if diff % 2 == 1:
+            bottom_y += 1
+
+    # Make sure box is always square.
+    assert ((right_x - left_x) == (bottom_y - top_y)), 'Box is not square.'
+
     return [left_x, top_y, right_x, bottom_y]
