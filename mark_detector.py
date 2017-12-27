@@ -7,9 +7,10 @@ CWD_PATH = os.getcwd()
 
 DNN_PROTOTXT = 'assets/deploy.prototxt'
 DNN_MODEL = 'assets/res10_300x300_ssd_iter_140000.caffemodel'
-
 FACE_NET = cv2.dnn.readNetFromCaffe(DNN_PROTOTXT, DNN_MODEL)
 
+CNN_INPUT_SIZE = 128
+MARK_MODEL = 'assets/frozen_inference_graph.pb'
 
 def get_faceboxes(image=None, threshold=0.5):
     """
@@ -64,3 +65,12 @@ def draw_box(image, faceboxes, box_color=(255, 255, 255)):
     for facebox in faceboxes:
         cv2.rectangle(image, (facebox[0], facebox[1]),
                       (facebox[2], facebox[3]), box_color)
+
+
+def move_box(box, offset):
+    """Move the box to direction specified by vector offset"""
+    left_x = box[0] + offset[0]
+    top_y = box[1] + offset[1]
+    right_x = box[2] + offset[0]
+    bottom_y = box[3] + offset[1]
+    return [left_x, top_y, right_x, bottom_y]
