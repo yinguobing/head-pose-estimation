@@ -108,3 +108,10 @@ def get_square_box(box):
     assert ((right_x - left_x) == (bottom_y - top_y)), 'Box is not square.'
 
     return [left_x, top_y, right_x, bottom_y]
+
+
+def box_in_image(box, image):
+    """Check if the box is in image"""
+    rows = image.shape[0]
+    cols = image.shape[1]
+    return box[0] >= 0 and box[1] >= 0 and box[2] <= cols and box[3] <= rows
