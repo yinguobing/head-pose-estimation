@@ -171,3 +171,12 @@ def detect_marks(image_np, sess, detection_graph):
     marks = np.reshape(marks, (-1, 2))
 
     return marks
+
+
+def draw_marks(image, marks, color=None):
+    """Draw mark points on image"""
+    if color is None:
+        color = (255, 255, 255)
+    for mark in marks:
+        cv2.circle(image, (int(mark[0]), int(
+            mark[1])), 1, color, -1, cv2.LINE_AA)
