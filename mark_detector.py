@@ -57,3 +57,10 @@ def draw_all_result(image, confidences, faceboxes):
                       (0, 255, 0), cv2.FILLED)
         cv2.putText(image, label, (facebox[0], facebox[1]),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+
+
+def draw_box(image, faceboxes, box_color=(255, 255, 255)):
+    """Draw square boxes on image"""
+    for facebox in faceboxes:
+        cv2.rectangle(image, (facebox[0], facebox[1]),
+                      (facebox[2], facebox[3]), box_color)
