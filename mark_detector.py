@@ -48,7 +48,7 @@ def draw_all_result(image, confidences, faceboxes):
         cv2.rectangle(image, (facebox[0], facebox[1]),
                       (facebox[2], facebox[3]), (0, 255, 0))
         label = "face: %.4f" % conf
-        label_size, base_line = cv.getTextSize(
+        label_size, base_line = cv2.getTextSize(
             label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
         cv2.rectangle(image, (facebox[0], facebox[1] - label_size[1]),
