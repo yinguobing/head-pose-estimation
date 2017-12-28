@@ -43,63 +43,53 @@ class Tracker:
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             vis = frame.copy()
 
-            # If features are already detected.
+            # Update tracks.
             if len(self.tracks) > 0:
-                img0, img1 = self.prev_gray, frame_gray
-                # print(self.tracks)
-                # print(self.tracks[0])
-                # print(self.tracks[0][-1])
+                img_old, img_new = self.prev_gray, frame_gray
 
-                p0 = np.float32([tr[-1]
-                                 for tr in self.tracks]).reshape(-1, 1, 2)
+                # Get old points, using the latest one.
+                points_pld = np.float32([track[-1]
+                                         for track in self.tracks]).reshape(-1, 1, 2)
 
-                # Get p1 from p0
-                p1, _st, _err = cv2.calcOpticalFlowPyrLK(
-                    img0, img1, p0, None, **LK_PARAMS)
+                # Get new points from old points.
+                points_new, _st, _err = cv2.calcOpticalFlowPyrLK(
+                    img_old, img_new, points_pld, None, **LK_PARAMS)
 
-                # Get p0r from p1
-                p0r, _st, _err = cv2.calcOpticalFlowPyrLK(
-                    img1, img0, p1, None, **LK_PARAMS)
+                # Get inferred old points from new points.
+                points_old_inferred, _st, _err = cv2.calcOpticalFlowPyrLK(
+                    img_new, img_old, points_new, None, **LK_PARAMS)
 
-                # Compare between p0 and p0r
-                d = abs(p0 - p0r).reshape(-1, 2).max(-1)
-                good = d < 1
+                # Compare between old points and inferred old points
+                error_term = abs(
+                    points_pld - points_old_inferred).reshape(-1, 2).max(-1)
+                point_valid = error_term < 1
 
                 new_tracks = []
-                for tr, (x, y), good_flag in zip(self.tracks, p1.reshape(-1, 2), good):
-                    # Feature good?
+                for track, (x, y), good_flag in zip(self.tracks, points_new.reshape(-1, 2), point_valid):
+                    # Track is good?
                     if not good_flag:
                         continue
 
-                    # Feature is good, add to feature list
-                    tr.append((x, y))
+                    # New point is good, add to track.
+                    track.append((x, y))
 
-                    # Need to drop old feature?
-                    if len(tr) > self.track_len:
-                        del tr[0]
+                    # Need to drop first old point?
+                    if len(track) > self.track_len:
+                        del track[0]
 
-                    # Add to feature groups
-                    new_tracks.append(tr)
+                    # Track updated, add to track groups.
+                    new_tracks.append(track)
 
                     cv2.circle(vis, (x, y), 2, (0, 255, 0), -1)
 
-                # New features group got
+                # New track groups got, do update.
                 self.tracks = new_tracks
-                cv2.polylines(vis, [np.int32(tr)
-                                    for tr in self.tracks], False, (0, 255, 0))
-                # draw_str(vis, (20, 20), 'track count: %d' % len(self.tracks))
 
-            # Add features every detect_interval frames.
-            if self.frame_idx % self.detect_interval == 0:
-                mask = np.zeros_like(frame_gray)
-                mask[:] = 255
-                for x, y in [np.int32(tr[-1]) for tr in self.tracks]:
-                    cv2.circle(mask, (x, y), 5, 0, -1)
-                p = cv2.goodFeaturesToTrack(
-                    frame_gray, mask=mask, **FEATURE_PARAMS)
-                if p is not None:
-                    for x, y in np.float32(p).reshape(-1, 2):
-                        self.tracks.append([(x, y)])
+                cv2.polylines(vis, [np.int32(track)
+                                    for track in self.tracks], False, (0, 255, 0))
+
+            # Get new tracks every detect_interval frames.
+            self.get_new_tracks(frame_gray)
 
             self.frame_idx += 1
             self.prev_gray = frame_gray
@@ -108,6 +98,23 @@ class Tracker:
             ch = cv2.waitKey(1)
             if ch == 27:
                 break
+
+    def get_new_tracks(self, frame_gray):
+        """Get new tracks every detect_interval frames."""
+        # Using mask to determine where to look for feature points.
+        mask = np.zeros_like(frame_gray)
+        mask[:] = 255
+
+        for x, y in [np.int32(track[-1]) for track in self.tracks]:
+            cv2.circle(mask, (x, y), 5, 0, -1)
+
+        # Get good feature points.
+        feature_points = cv2.goodFeaturesToTrack(
+            frame_gray, mask=mask, **FEATURE_PARAMS)
+
+        if feature_points is not None:
+            for x, y in np.float32(feature_points).reshape(-1, 2):
+                self.tracks.append([(x, y)])
 
 
 def main():
