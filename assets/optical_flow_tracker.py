@@ -19,20 +19,18 @@ import numpy as np
 
 import cv2
 
-LK_PARAMS = dict(winSize=(15, 15),
-                 maxLevel=2,
-                 criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-
-FEATURE_PARAMS = dict(maxCorners=500,
-                      qualityLevel=0.3,
-                      minDistance=7,
-                      blockSize=7)
-
 
 class Tracker:
     def __init__(self):
         self.track_len = 10
         self.tracks = []
+        self.lk_params = dict(winSize=(15, 15),
+                              maxLevel=2,
+                              criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+        self.feature_params = dict(maxCorners=500,
+                                   qualityLevel=0.3,
+                                   minDistance=7,
+                                   blockSize=7)
 
     def update_tracks(self, img_old, img_new, vis):
         """Update tracks."""
@@ -42,11 +40,11 @@ class Tracker:
 
         # Get new points from old points.
         points_new, _st, _err = cv2.calcOpticalFlowPyrLK(
-            img_old, img_new, points_pld, None, **LK_PARAMS)
+            img_old, img_new, points_pld, None, **self.lk_params)
 
         # Get inferred old points from new points.
         points_old_inferred, _st, _err = cv2.calcOpticalFlowPyrLK(
-            img_new, img_old, points_new, None, **LK_PARAMS)
+            img_new, img_old, points_new, None, **self.lk_params)
 
         # Compare between old points and inferred old points
         error_term = abs(
@@ -88,7 +86,7 @@ class Tracker:
 
         # Get good feature points.
         feature_points = cv2.goodFeaturesToTrack(
-            frame, mask=mask, **FEATURE_PARAMS)
+            frame, mask=mask, **self.feature_params)
 
         if feature_points is not None:
             for x, y in np.float32(feature_points).reshape(-1, 2):
