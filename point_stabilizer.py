@@ -42,15 +42,15 @@ class Stabilizer:
 
     def update(self, point):
         """Update the filter"""
+        # Make kalman prediction
+        self.prediction = self.filter.predict()
+
         # Get new measurement
         self.measurement = np.array([[np.float32(point[0])],
                                      [np.float32(point[1])]])
 
         # Correct according to mesurement
         self.filter.correct(self.measurement)
-
-        # Make kalman prediction
-        self.prediction = self.filter.predict()
 
 
 def main():
