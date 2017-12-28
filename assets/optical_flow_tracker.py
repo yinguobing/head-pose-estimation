@@ -48,8 +48,9 @@ class Tracker:
                 self.update_tracks(frame_gray, vis)
 
             # Get new tracks every detect_interval frames.
+            target_box = [100, 400, 100, 400]
             if self.frame_idx % self.detect_interval == 0:
-                self.get_new_tracks(frame_gray)
+                self.get_new_tracks(frame_gray, target_box)
 
             self.frame_idx += 1
             self.prev_gray = frame_gray
@@ -104,18 +105,18 @@ class Tracker:
         cv2.polylines(vis, [np.int32(track)
                             for track in self.tracks], False, (0, 255, 0))
 
-    def get_new_tracks(self, frame_gray):
+    def get_new_tracks(self, frame, roi):
         """Get new tracks every detect_interval frames."""
         # Using mask to determine where to look for feature points.
-        mask = np.zeros_like(frame_gray)
-        mask[:] = 255
+        mask = np.zeros_like(frame)
+        mask[roi[0]:roi[1], roi[2]:roi[3]] = 255
 
         for x, y in [np.int32(track[-1]) for track in self.tracks]:
             cv2.circle(mask, (x, y), 5, 0, -1)
 
         # Get good feature points.
         feature_points = cv2.goodFeaturesToTrack(
-            frame_gray, mask=mask, **FEATURE_PARAMS)
+            frame, mask=mask, **FEATURE_PARAMS)
 
         if feature_points is not None:
             for x, y in np.float32(feature_points).reshape(-1, 2):
