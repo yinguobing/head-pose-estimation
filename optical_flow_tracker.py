@@ -35,12 +35,12 @@ class Tracker:
     def update_tracks(self, img_old, img_new, vis):
         """Update tracks."""
         # Get old points, using the latest one.
-        points_pld = np.float32([track[-1]
+        points_old = np.float32([track[-1]
                                  for track in self.tracks]).reshape(-1, 1, 2)
 
         # Get new points from old points.
         points_new, _st, _err = cv2.calcOpticalFlowPyrLK(
-            img_old, img_new, points_pld, None, **self.lk_params)
+            img_old, img_new, points_old, None, **self.lk_params)
 
         # Get inferred old points from new points.
         points_old_inferred, _st, _err = cv2.calcOpticalFlowPyrLK(
@@ -48,7 +48,7 @@ class Tracker:
 
         # Compare between old points and inferred old points
         error_term = abs(
-            points_pld - points_old_inferred).reshape(-1, 2).max(-1)
+            points_old - points_old_inferred).reshape(-1, 2).max(-1)
         point_valid = error_term < 1
 
         new_tracks = []
@@ -100,7 +100,6 @@ def main():
     except:
         video_src = 0
 
-    print(__doc__)
     tracker = Tracker()
 
     cam = cv2.VideoCapture(video_src)
