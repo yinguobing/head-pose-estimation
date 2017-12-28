@@ -45,51 +45,11 @@ class Tracker:
 
             # Update tracks.
             if len(self.tracks) > 0:
-                img_old, img_new = self.prev_gray, frame_gray
-
-                # Get old points, using the latest one.
-                points_pld = np.float32([track[-1]
-                                         for track in self.tracks]).reshape(-1, 1, 2)
-
-                # Get new points from old points.
-                points_new, _st, _err = cv2.calcOpticalFlowPyrLK(
-                    img_old, img_new, points_pld, None, **LK_PARAMS)
-
-                # Get inferred old points from new points.
-                points_old_inferred, _st, _err = cv2.calcOpticalFlowPyrLK(
-                    img_new, img_old, points_new, None, **LK_PARAMS)
-
-                # Compare between old points and inferred old points
-                error_term = abs(
-                    points_pld - points_old_inferred).reshape(-1, 2).max(-1)
-                point_valid = error_term < 1
-
-                new_tracks = []
-                for track, (x, y), good_flag in zip(self.tracks, points_new.reshape(-1, 2), point_valid):
-                    # Track is good?
-                    if not good_flag:
-                        continue
-
-                    # New point is good, add to track.
-                    track.append((x, y))
-
-                    # Need to drop first old point?
-                    if len(track) > self.track_len:
-                        del track[0]
-
-                    # Track updated, add to track groups.
-                    new_tracks.append(track)
-
-                    cv2.circle(vis, (x, y), 2, (0, 255, 0), -1)
-
-                # New track groups got, do update.
-                self.tracks = new_tracks
-
-                cv2.polylines(vis, [np.int32(track)
-                                    for track in self.tracks], False, (0, 255, 0))
+                self.update_tracks(frame_gray, vis)
 
             # Get new tracks every detect_interval frames.
-            self.get_new_tracks(frame_gray)
+            if self.frame_idx % self.detect_interval == 0:
+                self.get_new_tracks(frame_gray)
 
             self.frame_idx += 1
             self.prev_gray = frame_gray
@@ -98,6 +58,51 @@ class Tracker:
             ch = cv2.waitKey(1)
             if ch == 27:
                 break
+
+    def update_tracks(self, frame_gray, vis):
+        """Update tracks."""
+        img_old, img_new = self.prev_gray, frame_gray
+
+        # Get old points, using the latest one.
+        points_pld = np.float32([track[-1]
+                                 for track in self.tracks]).reshape(-1, 1, 2)
+
+        # Get new points from old points.
+        points_new, _st, _err = cv2.calcOpticalFlowPyrLK(
+            img_old, img_new, points_pld, None, **LK_PARAMS)
+
+        # Get inferred old points from new points.
+        points_old_inferred, _st, _err = cv2.calcOpticalFlowPyrLK(
+            img_new, img_old, points_new, None, **LK_PARAMS)
+
+        # Compare between old points and inferred old points
+        error_term = abs(
+            points_pld - points_old_inferred).reshape(-1, 2).max(-1)
+        point_valid = error_term < 1
+
+        new_tracks = []
+        for track, (x, y), good_flag in zip(self.tracks, points_new.reshape(-1, 2), point_valid):
+            # Track is good?
+            if not good_flag:
+                continue
+
+            # New point is good, add to track.
+            track.append((x, y))
+
+            # Need to drop first old point?
+            if len(track) > self.track_len:
+                del track[0]
+
+            # Track updated, add to track groups.
+            new_tracks.append(track)
+
+            cv2.circle(vis, (x, y), 2, (0, 255, 0), -1)
+
+        # New track groups got, do update.
+        self.tracks = new_tracks
+
+        cv2.polylines(vis, [np.int32(track)
+                            for track in self.tracks], False, (0, 255, 0))
 
     def get_new_tracks(self, frame_gray):
         """Get new tracks every detect_interval frames."""
