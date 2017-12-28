@@ -37,29 +37,6 @@ class Tracker:
         self.cam = cv2.VideoCapture(video_src)
         self.frame_idx = 0
 
-    def run(self):
-        while True:
-            _ret, frame = self.cam.read()
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            vis = frame.copy()
-
-            # Update tracks.
-            if len(self.tracks) > 0:
-                self.update_tracks(frame_gray, vis)
-
-            # Get new tracks every detect_interval frames.
-            target_box = [100, 400, 100, 400]
-            if self.frame_idx % self.detect_interval == 0:
-                self.get_new_tracks(frame_gray, target_box)
-
-            self.frame_idx += 1
-            self.prev_gray = frame_gray
-            cv2.imshow('lk_track', vis)
-
-            ch = cv2.waitKey(1)
-            if ch == 27:
-                break
-
     def update_tracks(self, frame_gray, vis):
         """Update tracks."""
         img_old, img_new = self.prev_gray, frame_gray
@@ -131,8 +108,29 @@ def main():
         video_src = 0
 
     print(__doc__)
-    Tracker(video_src).run()
-    cv2.destroyAllWindows()
+    tracker = Tracker(video_src)
+
+    while True:
+        _ret, frame = tracker.cam.read()
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        vis = frame.copy()
+
+        # Update tracks.
+        if len(tracker.tracks) > 0:
+            tracker.update_tracks(frame_gray, vis)
+
+        # Get new tracks every detect_interval frames.
+        target_box = [100, 400, 100, 400]
+        if tracker.frame_idx % tracker.detect_interval == 0:
+            tracker.get_new_tracks(frame_gray, target_box)
+
+        tracker.frame_idx += 1
+        tracker.prev_gray = frame_gray
+        cv2.imshow('lk_track', vis)
+
+        ch = cv2.waitKey(1)
+        if ch == 27:
+            break
 
 
 if __name__ == '__main__':
