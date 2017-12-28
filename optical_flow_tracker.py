@@ -1,19 +1,7 @@
 '''
-Lucas-Kanade tracker
-====================
-
-Lucas-Kanade sparse optical flow demo. Uses goodFeaturesToTrack
+Lucas-Kanade sparse optical flow tracker. Uses goodFeaturesToTrack
 for track initialization and back-tracking for match verification
 between frames.
-
-Usage
------
-lk_track.py [<video_source>]
-
-
-Keys
-----
-ESC - exit
 '''
 import numpy as np
 
@@ -21,6 +9,8 @@ import cv2
 
 
 class Tracker:
+    """Lucas-Kanade sparse optical flow tracker"""
+
     def __init__(self):
         self.track_len = 10
         self.tracks = []
@@ -94,6 +84,7 @@ class Tracker:
 
 
 def main():
+    """Test code"""
     import sys
     try:
         video_src = sys.argv[1]
