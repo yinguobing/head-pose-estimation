@@ -51,3 +51,31 @@ class Stabilizer:
 
         # Make kalman prediction
         self.prediction = self.filter.predict()
+
+
+def main():
+    """Test code"""
+    global mp
+    mp = np.array((2, 1), np.float32)  # measurement
+
+    def onmouse(k, x, y, s, p):
+        global mp
+        mp = np.array([[np.float32(x)], [np.float32(y)]])
+
+    cv2.namedWindow("kalman")
+    cv2.setMouseCallback("kalman", onmouse)
+    kalman = Stabilizer(4, 2)
+    frame = np.zeros((480, 640, 3), np.uint8)  # drawing canvas
+
+    while True:
+        kalman.update(mp)
+        point = kalman.prediction
+        cv2.circle(frame, (point[0], point[1]), 2, (0, 255, 0), -1)
+        cv2.imshow("kalman", frame)
+        k = cv2.waitKey(30) & 0xFF
+        if k == 27:
+            break
+
+
+if __name__ == '__main__':
+    main()
