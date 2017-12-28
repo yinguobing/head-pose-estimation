@@ -30,17 +30,12 @@ FEATURE_PARAMS = dict(maxCorners=500,
 
 
 class Tracker:
-    def __init__(self, video_src):
+    def __init__(self):
         self.track_len = 10
-        self.detect_interval = 5
         self.tracks = []
-        self.cam = cv2.VideoCapture(video_src)
-        self.frame_idx = 0
 
-    def update_tracks(self, frame_gray, vis):
+    def update_tracks(self, img_old, img_new, vis):
         """Update tracks."""
-        img_old, img_new = self.prev_gray, frame_gray
-
         # Get old points, using the latest one.
         points_pld = np.float32([track[-1]
                                  for track in self.tracks]).reshape(-1, 1, 2)
@@ -108,24 +103,29 @@ def main():
         video_src = 0
 
     print(__doc__)
-    tracker = Tracker(video_src)
+    tracker = Tracker()
 
+    cam = cv2.VideoCapture(video_src)
+    detect_interval = 5
+    frame_idx = 0
+
+    prev_gray = cam.read()
     while True:
-        _ret, frame = tracker.cam.read()
+        _ret, frame = cam.read()
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         vis = frame.copy()
 
         # Update tracks.
         if len(tracker.tracks) > 0:
-            tracker.update_tracks(frame_gray, vis)
+            tracker.update_tracks(prev_gray, frame_gray, vis)
 
         # Get new tracks every detect_interval frames.
         target_box = [100, 400, 100, 400]
-        if tracker.frame_idx % tracker.detect_interval == 0:
+        if frame_idx % detect_interval == 0:
             tracker.get_new_tracks(frame_gray, target_box)
 
-        tracker.frame_idx += 1
-        tracker.prev_gray = frame_gray
+        frame_idx += 1
+        prev_gray = frame_gray
         cv2.imshow('lk_track', vis)
 
         ch = cv2.waitKey(1)
