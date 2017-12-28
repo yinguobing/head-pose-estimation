@@ -9,7 +9,11 @@ import cv2
 class Stabilizer:
     """Using Kalman filter as a point stabilizer."""
 
-    def __init__(self, state_num=4, measure_num=2):
+    def __init__(self,
+                 state_num=4,
+                 measure_num=2,
+                 cov_noise=0.0001,
+                 cov_measure=0.1):
         """Initialization"""
         # The filter itself.
         self.filter = cv2.KalmanFilter(state_num, measure_num, 0)
@@ -35,10 +39,10 @@ class Stabilizer:
         self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
                                                 [0, 1, 0, 0],
                                                 [0, 0, 1, 0],
-                                                [0, 0, 0, 1]], np.float32) * 0.01
+                                                [0, 0, 0, 1]], np.float32) * cov_noise
 
         self.filter.measurementNoiseCov = np.array([[1, 0],
-                                                    [0, 1]], np.float32) * 0.0001
+                                                    [0, 1]], np.float32) * cov_measure
 
     def update(self, point):
         """Update the filter"""
