@@ -22,7 +22,7 @@ class Tracker:
                                    minDistance=7,
                                    blockSize=7)
 
-    def update_tracks(self, img_old, img_new, vis):
+    def update_tracks(self, img_old, img_new):
         """Update tracks."""
         # Get old points, using the latest one.
         points_old = np.float32([track[-1]
@@ -57,22 +57,14 @@ class Tracker:
             # Track updated, add to track groups.
             new_tracks.append(track)
 
-            cv2.circle(vis, (x, y), 2, (0, 255, 0), -1)
-
         # New track groups got, do update.
         self.tracks = new_tracks
-
-        cv2.polylines(vis, [np.int32(track)
-                            for track in self.tracks], False, (0, 255, 0))
 
     def get_new_tracks(self, frame, roi):
         """Get new tracks every detect_interval frames."""
         # Using mask to determine where to look for feature points.
         mask = np.zeros_like(frame)
         mask[roi[0]:roi[1], roi[2]:roi[3]] = 255
-
-        for x, y in [np.int32(track[-1]) for track in self.tracks]:
-            cv2.circle(mask, (x, y), 5, 0, -1)
 
         # Get good feature points.
         feature_points = cv2.goodFeaturesToTrack(
@@ -81,6 +73,11 @@ class Tracker:
         if feature_points is not None:
             for x, y in np.float32(feature_points).reshape(-1, 2):
                 self.tracks.append([(x, y)])
+
+    def draw_track(self, image):
+        """Draw track lines on image."""
+        cv2.polylines(image, [np.int32(track)
+                              for track in self.tracks], False, (0, 255, 0))
 
 
 def main():
@@ -101,21 +98,22 @@ def main():
     while True:
         _ret, frame = cam.read()
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        vis = frame.copy()
 
         # Update tracks.
         if len(tracker.tracks) > 0:
-            tracker.update_tracks(prev_gray, frame_gray, vis)
+            tracker.update_tracks(prev_gray, frame_gray)
 
         # Get new tracks every detect_interval frames.
         target_box = [100, 400, 100, 400]
         if frame_idx % detect_interval == 0:
             tracker.get_new_tracks(frame_gray, target_box)
 
+        # Draw tracks
+        tracker.draw_track(frame)
+
         frame_idx += 1
         prev_gray = frame_gray
-        cv2.imshow('lk_track', vis)
-
+        cv2.imshow('lk_track', frame)
         ch = cv2.waitKey(1)
         if ch == 27:
             break
