@@ -21,9 +21,8 @@ def main():
     #     './clip.avi', cv2.VideoWriter_fourcc(*'MJPG'), 25, (1280, 480), True)
 
     # Introduce point stabilizer.
-    stabilizer_strong = [point_stabilizer.Stabilizer() for _ in range(68)]
-    stabilizer_light = [point_stabilizer.Stabilizer(
-        cov_noise=0.01, cov_measure=0.1) for _ in range(68)]
+    stabilizers = [point_stabilizer.Stabilizer(
+        cov_process=0.01, cov_measure=0.1) for _ in range(68)]
 
     while True:
         # Read frame
@@ -41,7 +40,7 @@ def main():
                 facebox[1]: facebox[3],
                 facebox[0]: facebox[2]]
 
-            # Detect landmarks
+            # Detect landmarks from image of 128x128.
             face_img = cv2.resize(face_img, (INPUT_SIZE, INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             landmarks = mark_detector.detect_marks(
@@ -51,26 +50,40 @@ def main():
             landmarks *= (facebox[2] - facebox[0])
             landmarks[:, 0] += facebox[0]
             landmarks[:, 1] += facebox[1]
-            mark_detector.draw_marks(frame_cnn, landmarks)
 
-            # Stabiliz all marks?
+            # Unconment the following line to show raw marks.
+            # mark_detector.draw_marks(frame_cnn, landmarks)
+
+            # All kind of detections faces a common issue: jitter. Usually this is
+            # solved by kinds of estimator, like partical filter or Kalman filter, etc.
+            # Here an Extended Kalman Filter is introduced as the target is not always
+            # in the same state. An optical flow tracker also proved to be helpfull to
+            # tell which state the target is currently in.
             stabile_marks = []
-            #TODO: use optical flow to determine which stabilizer to use.
-            if False:
-                stabilizer = stabilizer_light
+            # TODO: use optical flow to determine how to set stabilizer.
+            if True:
+                cov_process = 0.0001
+                cov_measure = 0.1
+                for stabilizer in stabilizers:
+                    stabilizer.set_q_r(cov_process=cov_process,
+                                       cov_measure=cov_measure)
             else:
-                stabilizer = stabilizer_strong
+                cov_process = 0.1
+                cov_measure = 0.001
+                for stabilizer in stabilizers:
+                    stabilizer.set_q_r(cov_process=cov_process,
+                                       cov_measure=cov_measure)
 
-            for point, stblzer in zip(landmarks, stabilizer):
-                stblzer.update(point)
-                stabile_marks.append([stblzer.prediction[0],
-                                      stblzer.prediction[1]])
+            for point, stabilizer in zip(landmarks, stabilizers):
+                stabilizer.update(point)
+                stabile_marks.append([stabilizer.prediction[0],
+                                      stabilizer.prediction[1]])
             mark_detector.draw_marks(
                 frame_cnn, stabile_marks, color=(0, 255, 0))
 
             # Try pose estimation
             pose_marks = pose_estimator.get_pose_marks(stabile_marks)
-            pose_marks = np.array(pose_marks, dtype=np.float)
+            pose_marks = np.array(pose_marks, dtype=np.float32)
             pose = pose_estimator.solve_pose(pose_marks)
             frame_cnn = pose_estimator.draw_annotation_box(
                 frame_cnn, pose[0], pose[1])
