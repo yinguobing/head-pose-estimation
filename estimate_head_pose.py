@@ -22,6 +22,8 @@ def main():
     # Introduce point stabilizer.
     stabilizers = [point_stabilizer.Stabilizer(
         cov_process=0.01, cov_measure=0.1) for _ in range(68)]
+    target_latest_state = 0     # 1: moving; 0: still.
+    target_current_state = 1
 
     # Introduce an optical flow tracker to help to decide how kalman filter
     # should be configured. Alos keep one frame for optical flow tracker.
@@ -42,7 +44,13 @@ def main():
         # Optical flow tracker should work before kalman filter.
         frame_opt_flw = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if len(tracker.tracks) > 0:
+            if tracker.get_average_track_length() > 2:
+                target_current_state = 1
+            else:
+                target_current_state = 0
+
             tracker.update_tracks(frame_prev, frame_opt_flw)
+
         frame_prev = frame_opt_flw
 
         # CNN benchmark.
@@ -78,16 +86,16 @@ def main():
             # in the same state. An optical flow tracker also proved to be helpfull to
             # tell which state the target is currently in.
             stabile_marks = []
-            # TODO: use optical flow to determine how to set stabilizer.
-            if True:
-                cov_process = 0.0001
-                cov_measure = 0.1
-                for stabilizer in stabilizers:
-                    stabilizer.set_q_r(cov_process=cov_process,
-                                       cov_measure=cov_measure)
-            else:
-                cov_process = 0.1
-                cov_measure = 0.001
+            if target_current_state != target_latest_state:
+                if target_current_state == 1:
+                    cov_process = 0.1
+                    cov_measure = 0.001
+                else:
+                    cov_process = 0.001
+                    cov_measure = 0.1
+
+                target_latest_state = target_current_state
+
                 for stabilizer in stabilizers:
                     stabilizer.set_q_r(cov_process=cov_process,
                                        cov_measure=cov_measure)
