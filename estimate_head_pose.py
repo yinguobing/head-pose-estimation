@@ -1,4 +1,5 @@
 """Test code for mark detector"""
+import dlib
 import numpy as np
 
 import cv2
@@ -16,14 +17,18 @@ def main():
     video_src = 0
     cam = cv2.VideoCapture(video_src)
 
-    # writer = cv2.VideoWriter(
-    #     './clip.avi', cv2.VideoWriter_fourcc(*'MJPG'), 25, (1280, 480), True)
+    # Construct a dlib shape predictor
+    predictor = dlib.shape_predictor(
+        'assets/shape_predictor_68_face_landmarks.dat')
 
     # Introduce point stabilizer.
     stabilizers = [point_stabilizer.Stabilizer(
-        cov_process=0.01, cov_measure=0.1) for _ in range(68)]
+        cov_process=0.1, cov_measure=1) for _ in range(68)]
     target_latest_state = 0     # 1: moving; 0: still.
     target_current_state = 1
+
+    stabilizers_dlib = [point_stabilizer.Stabilizer(
+        cov_process=0.1, cov_measure=1) for _ in range(68)]
 
     # Introduce an optical flow tracker to help to decide how kalman filter
     # should be configured. Alos keep one frame for optical flow tracker.
@@ -61,10 +66,10 @@ def main():
             target_box = [facebox[0], facebox[2], facebox[1], facebox[3]]
             if frame_count % 30 == 0:
                 tracker.get_new_tracks(frame_opt_flw, target_box)
-            tracker.draw_track(frame_cnn)
+            # tracker.draw_track(frame_cnn)
 
             # Detect landmarks from image of 128x128.
-            face_img = frame[
+            face_img = frame_cnn[
                 facebox[1]: facebox[3],
                 facebox[0]: facebox[2]]
             face_img = cv2.resize(face_img, (INPUT_SIZE, INPUT_SIZE))
@@ -91,7 +96,7 @@ def main():
                     cov_process = 0.1
                     cov_measure = 0.001
                 else:
-                    cov_process = 0.001
+                    cov_process = 0.01
                     cov_measure = 0.1
 
                 target_latest_state = target_current_state
@@ -104,8 +109,8 @@ def main():
                 stabilizer.update(point)
                 stabile_marks.append([stabilizer.prediction[0],
                                       stabilizer.prediction[1]])
-            mark_detector.draw_marks(
-                frame_cnn, stabile_marks, color=(0, 255, 0))
+            # mark_detector.draw_marks(
+            #     frame_cnn, stabile_marks, color=(0, 255, 0))
 
             # Try pose estimation
             pose_marks = pose_estimator.get_pose_marks(stabile_marks)
@@ -114,8 +119,40 @@ def main():
             frame_cnn = pose_estimator.draw_annotation_box(
                 frame_cnn, pose[0], pose[1])
 
-        cv2.imshow("Preview", frame_cnn)
-        # writer.write(frame_cmb)
+        # Dlib benchmark.
+        frame_dlib = frame.copy()
+        if facebox is not None:
+            # Detect landmarks
+            expd_ratio = 0.1
+            dlib_box = dlib.rectangle(int(facebox[0] * (1 + expd_ratio)),
+                                      int(facebox[1] * (1 + expd_ratio)),
+                                      int(facebox[2] * (1 - expd_ratio)),
+                                      int(facebox[3] * (1 - expd_ratio)))
+            dlib_shapes = predictor(frame_dlib, dlib_box)
+            dlib_mark_list = []
+            for shape_num in range(68):
+                dlib_mark_list.append(
+                    [dlib_shapes.part(shape_num).x,
+                     dlib_shapes.part(shape_num).y])
+
+            stabile_marks_dlib = []
+            for point, stabilizer in zip(dlib_mark_list, stabilizers_dlib):
+                stabilizer.update(point)
+                stabile_marks_dlib.append([stabilizer.prediction[0],
+                                           stabilizer.prediction[1]])
+            # Visualization of the result.
+            # mark_detector.draw_marks(frame_dlib, dlib_mark_list)
+
+            # Try pose estimation
+            pose_marks_dlib = pose_estimator.get_pose_marks(stabile_marks_dlib)
+            pose_marks_dlib = np.array(pose_marks_dlib, dtype=np.float32)
+            pose_dlib = pose_estimator.solve_pose(pose_marks_dlib)
+            frame_dlib = pose_estimator.draw_annotation_box(
+                frame_dlib, pose_dlib[0], pose_dlib[1])
+
+        # Combine two videos together.
+        frame_cmb = np.concatenate((frame_cnn, frame_dlib), axis=1)
+        cv2.imshow("Preview", frame_cmb)
 
         if cv2.waitKey(10) == 27:
             break
