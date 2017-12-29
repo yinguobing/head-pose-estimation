@@ -35,6 +35,7 @@ def main():
     tracker = optical_flow_tracker.Tracker()
     frame_prev = cam.read()
     frame_count = 0
+    tracker_threshold = 2
 
     while True:
         # Read frame, corp it, flip it, suits your needs.
@@ -44,15 +45,20 @@ def main():
         if video_src == 0:
             frame = cv2.flip(frame, 2)
         # frame = frame[0:480, 300:940]
+        cv2.rectangle(frame, (4, 28), (70, 4), (70, 70, 70), -1)
         frame_count += 1
 
         # Optical flow tracker should work before kalman filter.
         frame_opt_flw = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if len(tracker.tracks) > 0:
-            if tracker.get_average_track_length() > 2:
+            if tracker.get_average_track_length() > tracker_threshold:
                 target_current_state = 1
+                cv2.putText(frame, "Moving", (10, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (78, 207, 219))
             else:
                 target_current_state = 0
+                cv2.putText(frame, "Still", (10, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 180, 118))
 
             tracker.update_tracks(frame_prev, frame_opt_flw)
 
@@ -64,6 +70,8 @@ def main():
         if facebox is not None:
             # Set face area as mask for optical flow tracker.
             target_box = [facebox[0], facebox[2], facebox[1], facebox[3]]
+            # Update state check threshold
+            tracker_threshold = abs(facebox[2] - facebox[0]) * 0.005
             if frame_count % 30 == 0:
                 tracker.get_new_tracks(frame_opt_flw, target_box)
             # tracker.draw_track(frame_cnn)
@@ -96,8 +104,8 @@ def main():
                     cov_process = 0.1
                     cov_measure = 0.001
                 else:
-                    cov_process = 0.01
-                    cov_measure = 0.1
+                    cov_process = 0.1
+                    cov_measure = 1
 
                 target_latest_state = target_current_state
 
@@ -109,8 +117,7 @@ def main():
                 stabilizer.update(point)
                 stabile_marks.append([stabilizer.prediction[0],
                                       stabilizer.prediction[1]])
-            # mark_detector.draw_marks(
-            #     frame_cnn, stabile_marks, color=(0, 255, 0))
+            # mark_detector.draw_marks(frame_cnn, stabile_marks)
 
             # Try pose estimation
             pose_marks = pose_estimator.get_pose_marks(stabile_marks)
@@ -151,7 +158,7 @@ def main():
                 frame_dlib, pose_dlib[0], pose_dlib[1])
 
         # Combine two videos together.
-        frame_cmb = np.concatenate((frame_cnn, frame_dlib), axis=1)
+        frame_cmb = np.concatenate((frame_dlib, frame_cnn), axis=1)
         cv2.imshow("Preview", frame_cmb)
 
         if cv2.waitKey(10) == 27:
