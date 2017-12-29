@@ -39,6 +39,7 @@ def main():
         if video_src == 0:
             frame = cv2.flip(frame, 2)
         # frame = frame[0:480, 300:940]
+        cv2.rectangle(frame, (4, 28), (70, 4), (70, 70, 70), -1)
         frame_count += 1
 
         # Optical flow tracker should work before kalman filter.
@@ -46,8 +47,12 @@ def main():
         if len(tracker.tracks) > 0:
             if tracker.get_average_track_length() > 2:
                 target_current_state = 1
+                cv2.putText(frame, "Moving", (10, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (78, 207, 219))
             else:
                 target_current_state = 0
+                cv2.putText(frame, "Still", (10, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (78, 207, 219))
 
             tracker.update_tracks(frame_prev, frame_opt_flw)
 
