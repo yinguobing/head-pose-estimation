@@ -101,11 +101,13 @@ def main():
             stabile_marks = []
             if target_current_state != target_latest_state:
                 if target_current_state == 1:
+                    # Target is moving.
                     cov_process = 0.1
-                    cov_measure = 0.001
+                    cov_measure = 0.01
                 else:
-                    cov_process = 0.1
-                    cov_measure = 1
+                    # Traget is still.
+                    cov_process = 0.00001
+                    cov_measure = 0.1
 
                 target_latest_state = target_current_state
 
