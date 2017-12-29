@@ -58,7 +58,7 @@ def main():
         facebox = mark_detector.extract_cnn_facebox(frame_cnn)
         if facebox is not None:
             # Set face area as mask for optical flow tracker.
-            target_box = [facebox[0], facebox[2], facebox[1], facebox[3]]
+            target_box = [facebox[1], facebox[3], facebox[0], facebox[2]]
             if frame_count % 30 == 0:
                 tracker.get_new_tracks(frame_opt_flw, target_box)
             tracker.draw_track(frame_cnn)
