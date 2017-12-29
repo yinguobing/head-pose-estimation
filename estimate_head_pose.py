@@ -3,8 +3,9 @@ import numpy as np
 
 import cv2
 import mark_detector
-import pose_estimator
+import optical_flow_tracker
 import point_stabilizer
+import pose_estimator
 
 INPUT_SIZE = 128
 
@@ -24,23 +25,40 @@ def main():
     stabilizers = [point_stabilizer.Stabilizer(
         cov_process=0.01, cov_measure=0.1) for _ in range(68)]
 
+    # Introduce an optical flow tracker to help to decide how kalman filter
+    # should be configured. Alos keep one frame for optical flow tracker.
+    tracker = optical_flow_tracker.Tracker()
+    frame_prev = cam.read()
+    frame_count = 0
+
     while True:
-        # Read frame
+        # Read frame, and corp it if needed.
         frame_got, frame = cam.read()
         if frame_got is False:
             break
         # frame = frame[0:480, 300:940]
-        frame_cnn = frame.copy()
-        # frame_dlib = frame.copy()
+        frame_count += 1
+
+        # Optical flow tracker should work before kalman filter.
+        frame_opt_flw = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if len(tracker.tracks) > 0:
+            tracker.update_tracks(frame_prev, frame_opt_flw)
+        frame_prev = frame_opt_flw
 
         # CNN benchmark.
+        frame_cnn = frame.copy()
         facebox = mark_detector.extract_cnn_facebox(frame_cnn)
         if facebox is not None:
+            # Set face area as mask for optical flow tracker.
+            target_box = [facebox[0], facebox[2], facebox[1], facebox[3]]
+            if frame_count % 30 == 0:
+                tracker.get_new_tracks(frame_opt_flw, target_box)
+            tracker.draw_track(frame_cnn)
+
+            # Detect landmarks from image of 128x128.
             face_img = frame[
                 facebox[1]: facebox[3],
                 facebox[0]: facebox[2]]
-
-            # Detect landmarks from image of 128x128.
             face_img = cv2.resize(face_img, (INPUT_SIZE, INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             landmarks = mark_detector.detect_marks(
