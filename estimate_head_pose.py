@@ -69,7 +69,8 @@ def main():
         facebox = mark_detector.extract_cnn_facebox(frame_cnn)
         if facebox is not None:
             # Set face area as mask for optical flow tracker.
-            target_box = [facebox[0], facebox[2], facebox[1], facebox[3]]
+            target_box = [facebox[1], facebox[3],
+                          facebox[0], facebox[2]]
             # Update state check threshold
             tracker_threshold = abs(facebox[2] - facebox[0]) * 0.005
             if frame_count % 30 == 0:
@@ -106,7 +107,7 @@ def main():
                     cov_measure = 0.01
                 else:
                     # Traget is still.
-                    cov_process = 0.00001
+                    cov_process = 0.0001
                     cov_measure = 0.1
 
                 target_latest_state = target_current_state
