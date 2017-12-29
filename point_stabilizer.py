@@ -12,7 +12,7 @@ class Stabilizer:
     def __init__(self,
                  state_num=4,
                  measure_num=2,
-                 cov_noise=0.0001,
+                 cov_process=0.0001,
                  cov_measure=0.1):
         """Initialization"""
         # The filter itself.
@@ -39,7 +39,7 @@ class Stabilizer:
         self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
                                                 [0, 1, 0, 0],
                                                 [0, 0, 1, 0],
-                                                [0, 0, 0, 1]], np.float32) * cov_noise
+                                                [0, 0, 0, 1]], np.float32) * cov_process
 
         self.filter.measurementNoiseCov = np.array([[1, 0],
                                                     [0, 1]], np.float32) * cov_measure
@@ -55,6 +55,16 @@ class Stabilizer:
 
         # Correct according to mesurement
         self.filter.correct(self.measurement)
+
+    def set_q_r(self, cov_process=0.1, cov_measure=0.001):
+        """Set new value for processNoiseCov and measurementNoiseCov."""
+        self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
+                                                [0, 1, 0, 0],
+                                                [0, 0, 1, 0],
+                                                [0, 0, 0, 1]], np.float32) * cov_process
+
+        self.filter.measurementNoiseCov = np.array([[1, 0],
+                                                    [0, 1]], np.float32) * cov_measure
 
 
 def main():
