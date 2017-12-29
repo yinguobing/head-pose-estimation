@@ -3,6 +3,8 @@ Lucas-Kanade sparse optical flow tracker. Uses goodFeaturesToTrack
 for track initialization and back-tracking for match verification
 between frames.
 '''
+from math import sqrt
+
 import numpy as np
 
 import cv2
@@ -12,7 +14,7 @@ class Tracker:
     """Lucas-Kanade sparse optical flow tracker"""
 
     def __init__(self):
-        self.track_len = 10
+        self.track_len = 5
         self.tracks = []
         self.lk_params = dict(winSize=(15, 15),
                               maxLevel=2,
@@ -73,6 +75,19 @@ class Tracker:
         if feature_points is not None:
             for x, y in np.float32(feature_points).reshape(-1, 2):
                 self.tracks.append([(x, y)])
+
+    def get_average_track_length(self):
+        """Get the average track length"""
+        length = 0
+        tracks = np.array(self.tracks)
+        def distance(track):
+            """Get distance between the first and last point."""
+            delta_x = abs(track[-1][0] - track[0][0])
+            delta_y = abs(track[-1][1] - track[0][1])
+            return sqrt(delta_x*delta_x + delta_y*delta_y)
+        for track in tracks:
+            length += distance(track)
+        return length / len(tracks)
 
     def draw_track(self, image):
         """Draw track lines on image."""
