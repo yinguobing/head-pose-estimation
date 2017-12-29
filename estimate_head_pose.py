@@ -13,10 +13,8 @@ INPUT_SIZE = 128
 def main():
     """MAIN"""
     # Get frame from webcam or video file
-    cam = cv2.VideoCapture(
-        # '/home/robin/Documents/landmark/dataset/300VW_Dataset_2015_12_14/009/vid.avi'
-        0
-    )
+    video_src = 0
+    cam = cv2.VideoCapture(video_src)
 
     # writer = cv2.VideoWriter(
     #     './clip.avi', cv2.VideoWriter_fourcc(*'MJPG'), 25, (1280, 480), True)
@@ -32,10 +30,12 @@ def main():
     frame_count = 0
 
     while True:
-        # Read frame, and corp it if needed.
+        # Read frame, corp it, flip it, suits your needs.
         frame_got, frame = cam.read()
         if frame_got is False:
             break
+        if video_src == 0:
+            frame = cv2.flip(frame, 2)
         # frame = frame[0:480, 300:940]
         frame_count += 1
 
