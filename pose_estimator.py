@@ -50,6 +50,18 @@ def solve_pose(image_points):
     return (rotation_vector, translation_vector)
 
 
+def solve_pose_by_68_points(image_points):
+    """
+    Solve pose from all the 68 image points
+    Return (rotation_vector, translation_vector) as pose.
+    """
+    model_points_68 = get_full_model_points()
+    (success, rotation_vector, translation_vector) = cv2.solvePnP(
+        model_points_68, image_points, CAMERA_MATRIX, DIST_COEFFS)
+
+    return (rotation_vector, translation_vector)
+
+
 def draw_annotation_box(image, rotation_vector, translation_vector):
     """Draw a 3D box as annotation of pose"""
     point_3d = []
