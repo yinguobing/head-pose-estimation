@@ -28,6 +28,17 @@ CAMERA_MATRIX = np.array(
 DIST_COEFFS = np.zeros((4, 1))
 
 
+def get_full_model_points(filename='assets/model.txt'):
+    """Get all 68 3D model points from file"""
+    raw_value = []
+    with open(filename) as file:
+        for line in file:
+            raw_value.append(line)
+    model_points = np.array(raw_value, dtype=np.float32)
+    model_points = np.reshape(model_points, (3, -1)).T
+    return model_points
+
+
 def solve_pose(image_points):
     """
     Solve pose from image points
@@ -69,9 +80,12 @@ def draw_annotation_box(image, rotation_vector, translation_vector):
 
     # Draw all the lines
     cv2.polylines(image, [point_2d], True, (255, 255, 255), 1, cv2.LINE_AA)
-    cv2.line(image, tuple(point_2d[1]), tuple(point_2d[6]), (255, 255, 255), 1, cv2.LINE_AA)
-    cv2.line(image, tuple(point_2d[2]), tuple(point_2d[7]), (255, 255, 255), 1, cv2.LINE_AA)
-    cv2.line(image, tuple(point_2d[3]), tuple(point_2d[8]), (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.line(image, tuple(point_2d[1]), tuple(
+        point_2d[6]), (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.line(image, tuple(point_2d[2]), tuple(
+        point_2d[7]), (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.line(image, tuple(point_2d[3]), tuple(
+        point_2d[8]), (255, 255, 255), 1, cv2.LINE_AA)
     return image
 
 
