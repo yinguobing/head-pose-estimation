@@ -142,11 +142,11 @@ def main():
             # Filters re-configured, stabilize the marks.
             for point, stabilizer in zip(landmarks, stabilizers):
                 stabilizer.update(point)
-                stabile_marks.append([stabilizer.prediction[0],
-                                      stabilizer.prediction[1]])
+                stabile_marks.append([stabilizer.filter.statePost[0],
+                                      stabilizer.filter.statePost[1]])
 
             # Uncomment following line to show stabile marks.
-            # mark_detector.draw_marks(frame_cnn, stabile_marks)
+            mark_detector.draw_marks(frame_cnn, stabile_marks)
 
             # Try pose estimation
             pose_marks = pose_estimator.get_pose_marks(stabile_marks)
