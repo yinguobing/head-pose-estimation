@@ -10,7 +10,7 @@ import numpy as np
 import cv2
 import mark_detector
 # import optical_flow_tracker
-import stabilizer
+from stabilizer import Stabilizer
 import pose_estimator
 
 INPUT_SIZE = 128
@@ -23,7 +23,7 @@ def main():
     cam = cv2.VideoCapture(video_src)
 
     # Introduce point stabilizers for landmarks.
-    stabilizers = [stabilizer.Stabilizer(
+    stabilizers = [Stabilizer(
         cov_process=0.001, cov_measure=0.1) for _ in range(68)]
 
     # # Remember the user state for updating kalman filter parameters.
@@ -109,8 +109,8 @@ def main():
             stabile_marks = []
             for point, point_stabilizer in zip(marks, stabilizers):
                 point_stabilizer.update(point)
-                stabile_marks.append([point_stabilizer.filter.statePost[0],
-                                      point_stabilizer.filter.statePost[1]])
+                stabile_marks.append([point_stabilizer.state[0],
+                                      point_stabilizer.state[1]])
             stabile_marks = np.reshape(stabile_marks, (-1, 2))
 
             # Convert the marks locations from local CNN to global image.
