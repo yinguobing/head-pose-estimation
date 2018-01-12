@@ -15,19 +15,38 @@ class Stabilizer:
                  cov_process=0.0001,
                  cov_measure=0.1):
         """Initialization"""
+        # Currently we only support scalar and point, so check user input first.
+        assert state_num == 4 or state_num == 2, "Only scalar and point supported, Check state_num please."
+
+        # Store the parameters.
+        self.state_num = state_num
+        self.measure_num = measure_num
+
         # The filter itself.
         self.filter = cv2.KalmanFilter(state_num, measure_num, 0)
 
-        # # Store the state (x,y,detaX,detaY)
-        # self.state = np.zeros((state_num, 1), dtype=np.float)
+        # Store the state.
+        self.state = np.zeros((state_num, 1), dtype=np.float32)
 
-        # # Store the measurement result.
-        self.measurement = np.array((2, 1), np.float32)
+        # Store the measurement result.
+        self.measurement = np.array((measure_num, 1), np.float32)
 
-        # # The prediction.
-        self.prediction = np.zeros((2, 1), np.float32)
+        # Store the prediction.
+        self.prediction = np.zeros((state_num, 1), np.float32)
 
-        # state = 0.1 * np.random.randn(4, 2)
+        # Kalman parameters setup for scalar.
+        self.filter.transitionMatrix = np.array([[1, 0],
+                                                 [0, 1]], np.float32)
+
+        self.filter.measurementMatrix = np.array([[1]], np.float32)
+
+        self.filter.processNoiseCov = np.array([[1, 0],
+                                                [0, 1]], np.float32) * cov_process
+
+        self.filter.measurementNoiseCov = np.array(
+            [[1]], np.float32) * cov_measure
+
+        # Kalman parameters setup for point.
         self.filter.transitionMatrix = np.array([[1, 0, 1, 0],
                                                  [0, 1, 0, 1],
                                                  [0, 0, 1, 0],
@@ -44,27 +63,35 @@ class Stabilizer:
         self.filter.measurementNoiseCov = np.array([[1, 0],
                                                     [0, 1]], np.float32) * cov_measure
 
-    def update(self, point):
+    def update(self, measurement):
         """Update the filter"""
         # Make kalman prediction
         self.prediction = self.filter.predict()
 
         # Get new measurement
-        self.measurement = np.array([[np.float32(point[0])],
-                                     [np.float32(point[1])]])
+        if self.measure_num == 1:
+            self.measurement = np.array([[np.float32(measurement[0])]])
+        else:
+            self.measurement = np.array([[np.float32(measurement[0])],
+                                         [np.float32(measurement[1])]])
 
         # Correct according to mesurement
         self.filter.correct(self.measurement)
 
     def set_q_r(self, cov_process=0.1, cov_measure=0.001):
         """Set new value for processNoiseCov and measurementNoiseCov."""
-        self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
-                                                [0, 1, 0, 0],
-                                                [0, 0, 1, 0],
-                                                [0, 0, 0, 1]], np.float32) * cov_process
-
-        self.filter.measurementNoiseCov = np.array([[1, 0],
-                                                    [0, 1]], np.float32) * cov_measure
+        if self.measure_num == 1:
+            self.filter.processNoiseCov = np.array([[1, 0],
+                                        [0, 1]], np.float32) * cov_process
+            self.filter.measurementNoiseCov = np.array(
+                [[1]], np.float32) * cov_measure
+        else:
+            self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
+                                                    [0, 1, 0, 0],
+                                                    [0, 0, 1, 0],
+                                                    [0, 0, 0, 1]], np.float32) * cov_process
+            self.filter.measurementNoiseCov = np.array([[1, 0],
+                                                        [0, 1]], np.float32) * cov_measure
 
 
 def main():
