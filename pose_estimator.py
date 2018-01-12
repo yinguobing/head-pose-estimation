@@ -62,7 +62,7 @@ def solve_pose_by_68_points(image_points):
     return (rotation_vector, translation_vector)
 
 
-def draw_annotation_box(image, rotation_vector, translation_vector):
+def draw_annotation_box(image, rotation_vector, translation_vector, color=(255, 255, 255)):
     """Draw a 3D box as annotation of pose"""
     point_3d = []
     rear_size = 300
@@ -91,13 +91,13 @@ def draw_annotation_box(image, rotation_vector, translation_vector):
     point_2d = np.int32(point_2d.reshape(-1, 2))
 
     # Draw all the lines
-    cv2.polylines(image, [point_2d], True, (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.polylines(image, [point_2d], True, color, 1, cv2.LINE_AA)
     cv2.line(image, tuple(point_2d[1]), tuple(
-        point_2d[6]), (255, 255, 255), 1, cv2.LINE_AA)
+        point_2d[6]), color, 1, cv2.LINE_AA)
     cv2.line(image, tuple(point_2d[2]), tuple(
-        point_2d[7]), (255, 255, 255), 1, cv2.LINE_AA)
+        point_2d[7]), color, 1, cv2.LINE_AA)
     cv2.line(image, tuple(point_2d[3]), tuple(
-        point_2d[8]), (255, 255, 255), 1, cv2.LINE_AA)
+        point_2d[8]), color, 1, cv2.LINE_AA)
     return image
 
 
