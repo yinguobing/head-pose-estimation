@@ -78,6 +78,9 @@ class Stabilizer:
         # Correct according to mesurement
         self.filter.correct(self.measurement)
 
+        # Update state value.
+        self.state = self.filter.statePost
+
     def set_q_r(self, cov_process=0.1, cov_measure=0.001):
         """Set new value for processNoiseCov and measurementNoiseCov."""
         if self.measure_num == 1:
