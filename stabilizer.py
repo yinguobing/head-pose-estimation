@@ -35,33 +35,35 @@ class Stabilizer:
         self.prediction = np.zeros((state_num, 1), np.float32)
 
         # Kalman parameters setup for scalar.
-        self.filter.transitionMatrix = np.array([[1, 0],
-                                                 [0, 1]], np.float32)
+        if self.measure_num == 1:
+            self.filter.transitionMatrix = np.array([[1, 1],
+                                                     [0, 1]], np.float32)
 
-        self.filter.measurementMatrix = np.array([[1]], np.float32)
+            self.filter.measurementMatrix = np.array([[1, 1]], np.float32)
 
-        self.filter.processNoiseCov = np.array([[1, 0],
-                                                [0, 1]], np.float32) * cov_process
+            self.filter.processNoiseCov = np.array([[1, 0],
+                                                    [0, 1]], np.float32) * cov_process
 
-        self.filter.measurementNoiseCov = np.array(
-            [[1]], np.float32) * cov_measure
+            self.filter.measurementNoiseCov = np.array(
+                [[1]], np.float32) * cov_measure
 
         # Kalman parameters setup for point.
-        self.filter.transitionMatrix = np.array([[1, 0, 1, 0],
-                                                 [0, 1, 0, 1],
-                                                 [0, 0, 1, 0],
-                                                 [0, 0, 0, 1]], np.float32)
+        if self.measure_num == 2:
+            self.filter.transitionMatrix = np.array([[1, 0, 1, 0],
+                                                     [0, 1, 0, 1],
+                                                     [0, 0, 1, 0],
+                                                     [0, 0, 0, 1]], np.float32)
 
-        self.filter.measurementMatrix = np.array([[1, 0, 0, 0],
-                                                  [0, 1, 0, 0]], np.float32)
+            self.filter.measurementMatrix = np.array([[1, 0, 0, 0],
+                                                      [0, 1, 0, 0]], np.float32)
 
-        self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
-                                                [0, 1, 0, 0],
-                                                [0, 0, 1, 0],
-                                                [0, 0, 0, 1]], np.float32) * cov_process
+            self.filter.processNoiseCov = np.array([[1, 0, 0, 0],
+                                                    [0, 1, 0, 0],
+                                                    [0, 0, 1, 0],
+                                                    [0, 0, 0, 1]], np.float32) * cov_process
 
-        self.filter.measurementNoiseCov = np.array([[1, 0],
-                                                    [0, 1]], np.float32) * cov_measure
+            self.filter.measurementNoiseCov = np.array([[1, 0],
+                                                        [0, 1]], np.float32) * cov_measure
 
     def update(self, measurement):
         """Update the filter"""
@@ -85,7 +87,7 @@ class Stabilizer:
         """Set new value for processNoiseCov and measurementNoiseCov."""
         if self.measure_num == 1:
             self.filter.processNoiseCov = np.array([[1, 0],
-                                        [0, 1]], np.float32) * cov_process
+                                                    [0, 1]], np.float32) * cov_process
             self.filter.measurementNoiseCov = np.array(
                 [[1]], np.float32) * cov_measure
         else:
