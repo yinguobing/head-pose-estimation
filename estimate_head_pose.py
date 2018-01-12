@@ -23,8 +23,15 @@ def main():
     cam = cv2.VideoCapture(video_src)
 
     # Introduce point stabilizers for landmarks.
-    stabilizers = [Stabilizer(
+    point_stabilizers = [Stabilizer(
         cov_process=0.001, cov_measure=0.1) for _ in range(68)]
+
+    # Introduce scalar stabilizers for pose.
+    pose_stabilizers = [Stabilizer(
+        state_num=2,
+        measure_num=1,
+        cov_process=0.01,
+        cov_measure=0.1) for _ in range(6)]
 
     # # Remember the user state for updating kalman filter parameters.
     # # 1: moving; 0: still.
@@ -107,10 +114,10 @@ def main():
 
             # Stabilize the marks.
             stabile_marks = []
-            for point, point_stabilizer in zip(marks, stabilizers):
-                point_stabilizer.update(point)
-                stabile_marks.append([point_stabilizer.state[0],
-                                      point_stabilizer.state[1]])
+            for point, pt_stb in zip(marks, point_stabilizers):
+                pt_stb.update(point)
+                stabile_marks.append([pt_stb.state[0],
+                                      pt_stb.state[1]])
             stabile_marks = np.reshape(stabile_marks, (-1, 2))
 
             # Convert the marks locations from local CNN to global image.
@@ -168,9 +175,19 @@ def main():
             pose_marks = np.array(pose_marks, dtype=np.float32)
             pose = pose_estimator.solve_pose(pose_marks)
 
+            # Stabilize the pose.
+            stabile_pose = []
+            pose_np = np.array(pose).flatten()
+            for value, ps_stb in zip(pose_np, pose_stabilizers):
+                ps_stb.update([value])
+                stabile_pose.append(ps_stb.state[0])
+            stabile_pose = np.reshape(stabile_pose, (-1, 3))
+
             # Draw pose annotaion on frame.
+            # frame_cnn = pose_estimator.draw_annotation_box(
+            #     frame_cnn, pose[0], pose[1])
             frame_cnn = pose_estimator.draw_annotation_box(
-                frame_cnn, pose[0], pose[1])
+                frame_cnn, stabile_pose[0], stabile_pose[1], color=(0, 255, 0))
 
         # Show preview.
         cv2.imshow("Preview", frame_cnn)
