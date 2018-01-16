@@ -2,30 +2,33 @@
 import cv2
 import numpy as np
 
-# Image size
-SIZE = (480, 640)
 
-# 3D model points.
-MODEL_POINTS = np.array([
-    (0.0, 0.0, 0.0),             # Nose tip
-    (0.0, -330.0, -65.0),        # Chin
-    (-225.0, 170.0, -135.0),     # Left eye left corner
-    (225.0, 170.0, -135.0),      # Right eye right corne
-    (-150.0, -150.0, -125.0),    # Left Mouth corner
-    (150.0, -150.0, -125.0)      # Right mouth corner
-])
+class PoseEstimator:
+    """Estimate head pose according to the facial landmarks"""
 
-# Camera internals
-FOCAL_LENGTH = SIZE[1]
-CAMERA_CENTER = (SIZE[1] / 2, SIZE[0] / 2)
-CAMERA_MATRIX = np.array(
-    [[FOCAL_LENGTH, 0, CAMERA_CENTER[0]],
-     [0, FOCAL_LENGTH, CAMERA_CENTER[1]],
-     [0, 0, 1]], dtype="double"
-)
+    def __init__(self, img_size=(640, 480)):
+        self.size = img_size
 
-# Assuming no lens distortion
-DIST_COEFFS = np.zeros((4, 1))
+        # 3D model points.
+        self.model_points = np.array([
+            (0.0, 0.0, 0.0),             # Nose tip
+            (0.0, -330.0, -65.0),        # Chin
+            (-225.0, 170.0, -135.0),     # Left eye left corner
+            (225.0, 170.0, -135.0),      # Right eye right corne
+            (-150.0, -150.0, -125.0),    # Left Mouth corner
+            (150.0, -150.0, -125.0)      # Right mouth corner
+        ])
+
+        # Camera internals
+        self.focal_length = self.size[1]
+        self.camera_center = (self.size[1] / 2, self.size[0] / 2)
+        self.camera_matrix = np.array(
+            [[self.focal_length, 0, self.camera_center[0]],
+             [0, self.focal_length, self.camera_center[1]],
+             [0, 0, 1]], dtype="double")
+
+        # Assuming no lens distortion
+        self.dist_coeefs = np.zeros((4, 1))
 
 
 def get_full_model_points(filename='assets/model.txt'):
