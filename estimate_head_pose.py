@@ -9,7 +9,7 @@ import numpy as np
 
 import cv2
 import mark_detector
-import pose_estimator
+from pose_estimator import PoseEstimator
 from stabilizer import Stabilizer
 
 INPUT_SIZE = 128
@@ -24,6 +24,9 @@ def main():
     # Introduce point stabilizers for landmarks.
     point_stabilizers = [Stabilizer(
         cov_process=0.001, cov_measure=0.1) for _ in range(68)]
+
+    # Introduce pose estimator to solve pose.
+    pose_estimator = PoseEstimator(img_size=(640, 480))
 
     # Introduce scalar stabilizers for pose.
     pose_stabilizers = [Stabilizer(
