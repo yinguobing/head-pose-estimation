@@ -7,7 +7,7 @@ import cv2
 class PoseEstimator:
     """Estimate head pose according to the facial landmarks"""
 
-    def __init__(self, img_size=(640, 480)):
+    def __init__(self, img_size=(480, 640)):
         self.size = img_size
 
         # 3D model points.
