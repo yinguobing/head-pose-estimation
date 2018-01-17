@@ -8,11 +8,11 @@ by solving a PnP problem.
 import numpy as np
 
 import cv2
-import mark_detector
+from mark_detector import MarkDetector
 from pose_estimator import PoseEstimator
 from stabilizer import Stabilizer
 
-INPUT_SIZE = 128
+CNN_INPUT_SIZE = 128
 
 
 def main():
@@ -21,12 +21,15 @@ def main():
     video_src = 0
     cam = cv2.VideoCapture(video_src)
 
+    # Introduce mark_detector to detect landmarks.
+    mark_detector = MarkDetector()
+
     # Introduce point stabilizers for landmarks.
     point_stabilizers = [Stabilizer(
         cov_process=0.001, cov_measure=0.1) for _ in range(68)]
 
     # Introduce pose estimator to solve pose.
-    pose_estimator = PoseEstimator(img_size=(640, 480))
+    pose_estimator = PoseEstimator(img_size=(480, 640))
 
     # Introduce scalar stabilizers for pose.
     pose_stabilizers = [Stabilizer(
@@ -58,10 +61,9 @@ def main():
             # Detect landmarks from image of 128x128.
             face_img = frame_cnn[facebox[1]: facebox[3],
                                  facebox[0]: facebox[2]]
-            face_img = cv2.resize(face_img, (INPUT_SIZE, INPUT_SIZE))
+            face_img = cv2.resize(face_img, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
-            marks = mark_detector.detect_marks(
-                face_img, mark_detector.MARK_SESS, mark_detector.MARK_GRAPH)
+            marks = mark_detector.detect_marks(face_img)
 
             # Stabilize the marks.
             stabile_marks = []
@@ -84,7 +86,7 @@ def main():
             # mark_detector.draw_marks(
             #     frame_cnn, marks, color=(0, 255, 0))
 
-            # Uncomment following line to show stabile marks.
+            # # Uncomment following line to show stabile marks.
             # mark_detector.draw_marks(
             #     frame_cnn, stabile_marks, color=(255, 0, 0))
 
