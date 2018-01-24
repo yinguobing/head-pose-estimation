@@ -31,6 +31,10 @@ class PoseEstimator:
         # Assuming no lens distortion
         self.dist_coeefs = np.zeros((4, 1))
 
+        # Rotation vector and translation vector
+        self.r_vec = None
+        self.t_vec = None
+
     def _get_full_model_points(self, filename='assets/model.txt'):
         """Get all 68 3D model points from file"""
         raw_value = []
@@ -46,9 +50,20 @@ class PoseEstimator:
         Solve pose from image points
         Return (rotation_vector, translation_vector) as pose.
         """
-        (success, rotation_vector, translation_vector) = cv2.solvePnP(
-            self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
+        if self.r_vec is None:
+            (success, rotation_vector, translation_vector) = cv2.solvePnP(
+                self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
+            self.r_vec = rotation_vector
+            self.t_vec = translation_vector
 
+        (success, rotation_vector, translation_vector) = cv2.solvePnP(
+            self.model_points,
+            image_points,
+            self.camera_matrix,
+            self.dist_coeefs,
+            rvec=self.r_vec,
+            tvec=self.t_vec,
+            useExtrinsicGuess=True)
         return (rotation_vector, translation_vector)
 
     def solve_pose_by_68_points(self, image_points):
