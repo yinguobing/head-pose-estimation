@@ -35,7 +35,7 @@ def main():
     pose_stabilizers = [Stabilizer(
         state_num=2,
         measure_num=1,
-        cov_process=0.01,
+        cov_process=0.1,
         cov_measure=0.1) for _ in range(6)]
 
     while True:
@@ -55,12 +55,14 @@ def main():
         # 1. detect face;
         # 2. detect landmarks;
         # 3. estimate pose
-        frame_cnn = frame.copy()
-        facebox = mark_detector.extract_cnn_facebox(frame_cnn)
+        frame_1 = frame.copy()
+        frame_2 = frame.copy()
+        frame = np.concatenate((frame_1, frame_2), axis=1)
+        facebox = mark_detector.extract_cnn_facebox(frame_1)
         if facebox is not None:
             # Detect landmarks from image of 128x128.
-            face_img = frame_cnn[facebox[1]: facebox[3],
-                                 facebox[0]: facebox[2]]
+            face_img = frame_1[facebox[1]: facebox[3],
+                               facebox[0]: facebox[2]]
             face_img = cv2.resize(face_img, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             marks = mark_detector.detect_marks(face_img)
@@ -95,24 +97,29 @@ def main():
             pose_marks = np.array(pose_marks, dtype=np.float32)
             pose = pose_estimator.solve_pose(pose_marks)
 
+            # Try pose estimation with 68 points.
+            pose_68 = pose_estimator.solve_pose_by_68_points(marks)
+
             # Stabilize the pose.
             stabile_pose = []
-            pose_np = np.array(pose).flatten()
+            pose_np = np.array(pose_68).flatten()
             for value, ps_stb in zip(pose_np, pose_stabilizers):
                 ps_stb.update([value])
                 stabile_pose.append(ps_stb.state[0])
             stabile_pose = np.reshape(stabile_pose, (-1, 3))
 
             # Uncomment following line to draw pose annotaion on frame.
-            frame_cnn = pose_estimator.draw_annotation_box(
-                frame_cnn, pose[0], pose[1])
+            pose_estimator.draw_annotation_box(
+                frame_1, pose[0], pose[1], color=(128, 255, 128))
 
             # Uncomment following line to draw stabile pose annotaion on frame.
-            # frame_cnn = pose_estimator.draw_annotation_box(
-            #     frame_cnn, stabile_pose[0], stabile_pose[1], color=(0, 255, 0))
+            pose_estimator.draw_annotation_box(
+                frame_2, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
+
+            frame = np.concatenate((frame_1, frame_2), axis=1)
 
         # Show preview.
-        cv2.imshow("Preview", frame_cnn)
+        cv2.imshow("Preview", frame)
 
         if cv2.waitKey(10) == 27:
             break
