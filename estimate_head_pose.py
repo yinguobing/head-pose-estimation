@@ -24,10 +24,6 @@ def main():
     # Introduce mark_detector to detect landmarks.
     mark_detector = MarkDetector()
 
-    # Introduce point stabilizers for landmarks.
-    point_stabilizers = [Stabilizer(
-        cov_process=0.001, cov_measure=0.1) for _ in range(68)]
-
     # Introduce pose estimator to solve pose.
     pose_estimator = PoseEstimator(img_size=(480, 640))
 
@@ -55,69 +51,42 @@ def main():
         # 1. detect face;
         # 2. detect landmarks;
         # 3. estimate pose
-        frame_1 = frame.copy()
-        frame_2 = frame.copy()
-        frame = np.concatenate((frame_1, frame_2), axis=1)
-        facebox = mark_detector.extract_cnn_facebox(frame_1)
+        facebox = mark_detector.extract_cnn_facebox(frame)
         if facebox is not None:
             # Detect landmarks from image of 128x128.
-            face_img = frame_1[facebox[1]: facebox[3],
-                               facebox[0]: facebox[2]]
+            face_img = frame[facebox[1]: facebox[3],
+                             facebox[0]: facebox[2]]
             face_img = cv2.resize(face_img, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
             marks = mark_detector.detect_marks(face_img)
-
-            # Stabilize the marks.
-            stabile_marks = []
-            for point, pt_stb in zip(marks, point_stabilizers):
-                pt_stb.update(point)
-                stabile_marks.append([pt_stb.state[0],
-                                      pt_stb.state[1]])
-            stabile_marks = np.reshape(stabile_marks, (-1, 2))
 
             # Convert the marks locations from local CNN to global image.
             marks *= (facebox[2] - facebox[0])
             marks[:, 0] += facebox[0]
             marks[:, 1] += facebox[1]
 
-            stabile_marks *= (facebox[2] - facebox[0])
-            stabile_marks[:, 0] += facebox[0]
-            stabile_marks[:, 1] += facebox[1]
-
             # Uncomment following line to show raw marks.
             # mark_detector.draw_marks(
             #     frame_cnn, marks, color=(0, 255, 0))
 
-            # # Uncomment following line to show stabile marks.
-            # mark_detector.draw_marks(
-            #     frame_cnn, stabile_marks, color=(255, 0, 0))
-
-            # Try pose estimation
-            pose_marks = pose_estimator.get_pose_marks(stabile_marks)
-            pose_marks = np.array(pose_marks, dtype=np.float32)
-            pose = pose_estimator.solve_pose(pose_marks)
-
             # Try pose estimation with 68 points.
-            pose_68 = pose_estimator.solve_pose_by_68_points(marks)
+            pose = pose_estimator.solve_pose_by_68_points(marks)
 
             # Stabilize the pose.
             stabile_pose = []
-            pose_np = np.array(pose_68).flatten()
+            pose_np = np.array(pose).flatten()
             for value, ps_stb in zip(pose_np, pose_stabilizers):
                 ps_stb.update([value])
                 stabile_pose.append(ps_stb.state[0])
             stabile_pose = np.reshape(stabile_pose, (-1, 3))
 
             # Uncomment following line to draw pose annotaion on frame.
-            pose_estimator.draw_annotation_box(
-                frame_1, pose[0], pose[1], color=(128, 255, 128))
+            # pose_estimator.draw_annotation_box(
+            #     frame, pose[0], pose[1], color=(255, 128, 128))
 
             # Uncomment following line to draw stabile pose annotaion on frame.
             pose_estimator.draw_annotation_box(
-                frame_2, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
-            # pose_estimator.draw_mask(frame_2)
-
-            frame = np.concatenate((frame_1, frame_2), axis=1)
+                frame, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
 
         # Show preview.
         cv2.imshow("Preview", frame)
