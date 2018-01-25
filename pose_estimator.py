@@ -18,7 +18,9 @@ class PoseEstimator:
             (225.0, 170.0, -135.0),      # Right eye right corne
             (-150.0, -150.0, -125.0),    # Left Mouth corner
             (150.0, -150.0, -125.0)      # Right mouth corner
-        ])
+        ]) / 4.5
+
+        self.model_points_68 = self._get_full_model_points()
 
         # Camera internals
         self.focal_length = self.size[1]
@@ -32,8 +34,11 @@ class PoseEstimator:
         self.dist_coeefs = np.zeros((4, 1))
 
         # Rotation vector and translation vector
-        self.r_vec = None
-        self.t_vec = None
+        self.r_vec = np.array([[0.01891013], [0.08560084], [-3.14392813]])
+        self.t_vec = np.array(
+            [[-14.97821226], [-10.62040383], [-2053.03596872]])
+        # self.r_vec = None
+        # self.t_vec = None
 
     def _get_full_model_points(self, filename='assets/model.txt'):
         """Get all 68 3D model points from file"""
@@ -43,6 +48,9 @@ class PoseEstimator:
                 raw_value.append(line)
         model_points = np.array(raw_value, dtype=np.float32)
         model_points = np.reshape(model_points, (3, -1)).T
+        # model_points *= 4
+        model_points[:, -1] *= -1
+
         return model_points
 
     def solve_pose(self, image_points):
@@ -50,20 +58,17 @@ class PoseEstimator:
         Solve pose from image points
         Return (rotation_vector, translation_vector) as pose.
         """
-        if self.r_vec is None:
-            (success, rotation_vector, translation_vector) = cv2.solvePnP(
-                self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
-            self.r_vec = rotation_vector
-            self.t_vec = translation_vector
+        (_, rotation_vector, translation_vector) = cv2.solvePnP(
+            self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
 
-        (success, rotation_vector, translation_vector) = cv2.solvePnP(
-            self.model_points,
-            image_points,
-            self.camera_matrix,
-            self.dist_coeefs,
-            rvec=self.r_vec,
-            tvec=self.t_vec,
-            useExtrinsicGuess=True)
+        # (success, rotation_vector, translation_vector) = cv2.solvePnP(
+        #     self.model_points,
+        #     image_points,
+        #     self.camera_matrix,
+        #     self.dist_coeefs,
+        #     rvec=self.r_vec,
+        #     tvec=self.t_vec,
+        #     useExtrinsicGuess=True)
         return (rotation_vector, translation_vector)
 
     def solve_pose_by_68_points(self, image_points):
@@ -71,16 +76,28 @@ class PoseEstimator:
         Solve pose from all the 68 image points
         Return (rotation_vector, translation_vector) as pose.
         """
-        model_points_68 = self._get_full_model_points()
-        (success, rotation_vector, translation_vector) = cv2.solvePnP(
-            model_points_68, image_points, self.camera_matrix, self.dist_coeefs)
+
+        if self.r_vec is None:
+            (_, rotation_vector, translation_vector) = cv2.solvePnP(
+                self.model_points_68, image_points, self.camera_matrix, self.dist_coeefs)
+            self.r_vec = rotation_vector
+            self.t_vec = translation_vector
+
+        (_, rotation_vector, translation_vector) = cv2.solvePnP(
+            self.model_points_68,
+            image_points,
+            self.camera_matrix,
+            self.dist_coeefs,
+            rvec=self.r_vec,
+            tvec=self.t_vec,
+            useExtrinsicGuess=True)
 
         return (rotation_vector, translation_vector)
 
     def draw_annotation_box(self, image, rotation_vector, translation_vector, color=(255, 255, 255)):
         """Draw a 3D box as annotation of pose"""
         point_3d = []
-        rear_size = 300
+        rear_size = 75
         rear_depth = 0
         point_3d.append((-rear_size, -rear_size, rear_depth))
         point_3d.append((-rear_size, rear_size, rear_depth))
@@ -88,8 +105,8 @@ class PoseEstimator:
         point_3d.append((rear_size, -rear_size, rear_depth))
         point_3d.append((-rear_size, -rear_size, rear_depth))
 
-        front_size = 400
-        front_depth = 400
+        front_size = 100
+        front_depth = 100
         point_3d.append((-front_size, -front_size, front_depth))
         point_3d.append((-front_size, front_size, front_depth))
         point_3d.append((front_size, front_size, front_depth))
@@ -113,7 +130,6 @@ class PoseEstimator:
             point_2d[7]), color, 1, cv2.LINE_AA)
         cv2.line(image, tuple(point_2d[3]), tuple(
             point_2d[8]), color, 1, cv2.LINE_AA)
-        return image
 
     def get_pose_marks(self, marks):
         """Get marks ready for pose estimation from 68 marks"""
