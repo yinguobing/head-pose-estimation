@@ -115,6 +115,7 @@ def main():
             # Uncomment following line to draw stabile pose annotaion on frame.
             pose_estimator.draw_annotation_box(
                 frame_2, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
+            # pose_estimator.draw_mask(frame_2)
 
             frame = np.concatenate((frame_1, frame_2), axis=1)
 
