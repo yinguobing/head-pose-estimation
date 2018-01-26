@@ -17,15 +17,18 @@ CNN_INPUT_SIZE = 128
 
 def main():
     """MAIN"""
-    # Get frame from webcam or video file
+    # Video source from webcam or video file.
     video_src = 0
     cam = cv2.VideoCapture(video_src)
 
     # Introduce mark_detector to detect landmarks.
     mark_detector = MarkDetector()
 
-    # Introduce pose estimator to solve pose.
-    pose_estimator = PoseEstimator(img_size=(480, 640))
+    # Introduce pose estimator to solve pose. Get one frame to setup the
+    # estimator according to the image size.
+    _, sample_frame = cam.read()
+    height, width = sample_frame.shape[:2]
+    pose_estimator = PoseEstimator(img_size=(height, width))
 
     # Introduce scalar stabilizers for pose.
     pose_stabilizers = [Stabilizer(
