@@ -67,7 +67,7 @@ def main():
 
             # Uncomment following line to show raw marks.
             # mark_detector.draw_marks(
-            #     frame_cnn, marks, color=(0, 255, 0))
+            #     frame, marks, color=(0, 255, 0))
 
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
