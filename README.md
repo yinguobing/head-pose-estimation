@@ -15,3 +15,7 @@ There are three major steps:
 
 3. Pose estimation. Once we got the 68 facial landmarks, a mutual PnP algorithms is adopted to calculate the pose.
 
+## Miscellaneous
+- The marks is detected frame by frame, which result in small variance between adjacent frames. This makes the pose unstaible. A Kalman filter is used to solve this problem, you can draw the original pose to observe the difference.
+
+- The 3D model of face comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
