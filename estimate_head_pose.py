@@ -5,6 +5,8 @@ detection. The facial landmark detection is done by a custom Convolutional
 Neural Network trained with TensorFlow. After that, head pose is estimated
 by solving a PnP problem.
 """
+from multiprocessing import Process, Queue
+
 import numpy as np
 
 import cv2
@@ -15,18 +17,33 @@ from stabilizer import Stabilizer
 CNN_INPUT_SIZE = 128
 
 
+def get_face(detector, img_queue, box_queue):
+    """Get face from image queue"""
+    while True:
+        image = img_queue.get()
+        box = detector.extract_cnn_facebox(image)
+        box_queue.put(box)
+
+
 def main():
     """MAIN"""
     # Video source from webcam or video file.
     video_src = 0
     cam = cv2.VideoCapture(video_src)
+    _, sample_frame = cam.read()
 
     # Introduce mark_detector to detect landmarks.
     mark_detector = MarkDetector()
 
+    img_queue = Queue()
+    img_queue.put(sample_frame)
+    box_queue = Queue()
+    box_process = Process(target=get_face, args=(
+        mark_detector, img_queue, box_queue,))
+    box_process.start()
+
     # Introduce pose estimator to solve pose. Get one frame to setup the
     # estimator according to the image size.
-    _, sample_frame = cam.read()
     height, width = sample_frame.shape[:2]
     pose_estimator = PoseEstimator(img_size=(height, width))
 
@@ -54,7 +71,10 @@ def main():
         # 1. detect face;
         # 2. detect landmarks;
         # 3. estimate pose
-        facebox = mark_detector.extract_cnn_facebox(frame)
+        # facebox = mark_detector.extract_cnn_facebox(frame)
+        img_queue.put(frame)
+        facebox = box_queue.get()
+
         if facebox is not None:
             # Detect landmarks from image of 128x128.
             face_img = frame[facebox[1]: facebox[3],
@@ -93,9 +113,10 @@ def main():
 
         # Show preview.
         cv2.imshow("Preview", frame)
-
         if cv2.waitKey(10) == 27:
             break
+    box_process.terminate()
+    box_process.join()
 
 
 if __name__ == '__main__':
