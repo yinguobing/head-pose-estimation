@@ -18,7 +18,11 @@ CNN_INPUT_SIZE = 128
 
 
 def get_face(detector, img_queue, box_queue):
+<<<<<<< HEAD
     """Get face from image queue. This function is used for multiprocessing"""
+=======
+    """Get face from image queue"""
+>>>>>>> 1fb1cca664c37f7755775eaa7791b99ccc7640cf
     while True:
         image = img_queue.get()
         box = detector.extract_cnn_facebox(image)
@@ -35,10 +39,16 @@ def main():
     # Introduce mark_detector to detect landmarks.
     mark_detector = MarkDetector()
 
+<<<<<<< HEAD
     # Setup process and queues for multiprocessing.
     img_queue = Queue()
     box_queue = Queue()
     img_queue.put(sample_frame)
+=======
+    img_queue = Queue()
+    img_queue.put(sample_frame)
+    box_queue = Queue()
+>>>>>>> 1fb1cca664c37f7755775eaa7791b99ccc7640cf
     box_process = Process(target=get_face, args=(
         mark_detector, img_queue, box_queue,))
     box_process.start()
@@ -72,11 +82,16 @@ def main():
         # 1. detect face;
         # 2. detect landmarks;
         # 3. estimate pose
+<<<<<<< HEAD
 
         # Feed frame to image queue.
         img_queue.put(frame)
 
         # Get face from box queue.
+=======
+        # facebox = mark_detector.extract_cnn_facebox(frame)
+        img_queue.put(frame)
+>>>>>>> 1fb1cca664c37f7755775eaa7791b99ccc7640cf
         facebox = box_queue.get()
 
         if facebox is not None:
@@ -119,6 +134,8 @@ def main():
         cv2.imshow("Preview", frame)
         if cv2.waitKey(10) == 27:
             break
+    box_process.terminate()
+    box_process.join()
 
     # Clean up the multiprocessing process.
     box_process.terminate()
