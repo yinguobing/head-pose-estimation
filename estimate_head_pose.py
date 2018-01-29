@@ -119,8 +119,6 @@ def main():
         cv2.imshow("Preview", frame)
         if cv2.waitKey(10) == 27:
             break
-    box_process.terminate()
-    box_process.join()
 
     # Clean up the multiprocessing process.
     box_process.terminate()
