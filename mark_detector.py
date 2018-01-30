@@ -19,8 +19,7 @@ class FaceDetector:
         """
         Get the bounding box of faces in image using dnn.
         """
-        rows = image.shape[0]
-        cols = image.shape[1]
+        rows, cols, _ = image.shape
 
         confidences = []
         faceboxes = []
@@ -180,10 +179,5 @@ class MarkDetector:
     def draw_marks(image, marks, color=(255, 255, 255)):
         """Draw mark points on image"""
         for mark in marks:
-            cv2.circle(image,
-                       (int(mark[0]),
-                        int(mark[1])),
-                       1,
-                       color,
-                       -1,
-                       cv2.LINE_AA)
+            cv2.circle(image, (int(mark[0]), int(
+                mark[1])), 1, color, -1, cv2.LINE_AA)
