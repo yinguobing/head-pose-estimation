@@ -5,6 +5,13 @@ This repo shows how to estimate human head pose from videos using TensorFlow and
 ![demo](https://github.com/yinguobing/head-pose-estimation/raw/master/demo.gif)
 ![demo](https://github.com/yinguobing/head-pose-estimation/raw/master/demo1.gif)
 
+## Dependence
+- TensorFlow 1.4
+- OpenCV 3.3
+- Python 3
+
+The code is tested under Ubuntu 16.04.
+
 ## How it works
 
 There are three major steps:
