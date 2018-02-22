@@ -11,8 +11,12 @@ import numpy as np
 
 import cv2
 from mark_detector import MarkDetector
+from os_detector import detect_os
 from pose_estimator import PoseEstimator
 from stabilizer import Stabilizer
+
+# multiprocessing may not work on Windows and macOS, check OS for safety.
+detect_os()
 
 CNN_INPUT_SIZE = 128
 
