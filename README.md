@@ -27,6 +27,8 @@ There are three major steps:
 
 - The 3D model of face comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
 
+- The build in face detector comes from OpenCV. https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
+
 ## License
 The code is licensed under the MIT license. However, the pre-trained TensorFlow model file is trained with various public data sets which have their own licenses. Please refer to them before using this code.
 
