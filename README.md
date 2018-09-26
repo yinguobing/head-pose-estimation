@@ -38,3 +38,5 @@ The code is licensed under the MIT license. However, the pre-trained TensorFlow 
 - HELEN: http://www.ifp.illinois.edu/~vuongle2/helen/
 - AFW: https://www.ics.uci.edu/~xzhu/face/
 - IBUG: https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/
+
+(Currently we are trying to empower embeded devices to be more powerful with deep learning, please get in touch if you are interested and would like to join us.)
