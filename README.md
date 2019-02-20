@@ -64,9 +64,10 @@ The pre-trained TensorFlow model file is trained with various public data sets w
 
 The 3D model of face comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
 
-The build in face detector comes from OpenCV. https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
+The build in face detector comes from OpenCV. 
+https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
 
-To reproduce the facial landmark detection model, you can refer to this series of posts(in Chinese only).
+To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only).
 
 ## Finally
 If you are interested in Deep Learning and happened to be seeking for a job opportunity, feel free to get in touch.
