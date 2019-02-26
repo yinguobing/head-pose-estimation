@@ -19,7 +19,7 @@ The code is tested under Ubuntu 16.04.
 
 ### Installing
 
-This repository comes with a pre-trained model for facial landmark detection. Just git clone than you are good to go.
+This repository comes with a pre-trained model for facial landmark detection. Just git clone then you are good to go.
 
 ```bash
 # From the directory where you want to put this project:
