@@ -48,6 +48,10 @@ There are three major steps:
 
 The marks is detected frame by frame, which result in small variance between adjacent frames. This makes the pose unstable. A Kalman filter is used to solve this problem, you can draw the original pose to observe the difference.
 
+## Retrain the model
+
+To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only).
+
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
@@ -66,8 +70,6 @@ The 3D model of face comes from OpenFace, you can find the original file [here](
 
 The build in face detector comes from OpenCV. 
 https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
-
-To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only).
 
 ## Finally
 If you are interested in Deep Learning and happened to be seeking for a job opportunity, feel free to get in touch.
