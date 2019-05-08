@@ -10,6 +10,8 @@ from multiprocessing import Process, Queue
 import numpy as np
 
 import cv2
+print("OpenCV version: {}".format(cv2.__version__))
+
 from mark_detector import MarkDetector
 from os_detector import detect_os
 from pose_estimator import PoseEstimator
@@ -34,6 +36,8 @@ def main():
     # Video source from webcam or video file.
     video_src = 0
     cam = cv2.VideoCapture(video_src)
+    if video_src == 0:
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     _, sample_frame = cam.read()
 
     # Introduce mark_detector to detect landmarks.
@@ -58,6 +62,8 @@ def main():
         measure_num=1,
         cov_process=0.1,
         cov_measure=0.1) for _ in range(6)]
+
+    tm = cv2.TickMeter()
 
     while True:
         # Read frame, crop it, flip it, suits your needs.
@@ -89,7 +95,11 @@ def main():
                              facebox[0]: facebox[2]]
             face_img = cv2.resize(face_img, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
+
+            tm.start()
             marks = mark_detector.detect_marks(face_img)
+            tm.stop()
+            print(tm.getTimeSec()/tm.count())
 
             # Convert the marks locations from local CNN to global image.
             marks *= (facebox[2] - facebox[0])
