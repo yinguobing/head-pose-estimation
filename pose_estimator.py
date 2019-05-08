@@ -15,9 +15,9 @@ class PoseEstimator:
             (0.0, 0.0, 0.0),             # Nose tip
             (0.0, -330.0, -65.0),        # Chin
             (-225.0, 170.0, -135.0),     # Left eye left corner
-            (225.0, 170.0, -135.0),      # Right eye right corne
-            (-150.0, -150.0, -125.0),    # Left Mouth corner
-            (150.0, -150.0, -125.0)      # Right mouth corner
+            (225.0, 170.0, -135.0),      # Right eye right corner
+            (-150.0, -150.0, -125.0),    # Mouth left corner
+            (150.0, -150.0, -125.0)      # Mouth right corner
         ]) / 4.5
 
         self.model_points_68 = self._get_full_model_points()
@@ -138,6 +138,6 @@ class PoseEstimator:
         pose_marks.append(marks[8])     # Chin
         pose_marks.append(marks[36])    # Left eye left corner
         pose_marks.append(marks[45])    # Right eye right corner
-        pose_marks.append(marks[48])    # Left Mouth corner
-        pose_marks.append(marks[54])    # Right mouth corner
+        pose_marks.append(marks[48])    # Mouth left corner
+        pose_marks.append(marks[54])    # Mouth right corner
         return pose_marks
