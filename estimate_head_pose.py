@@ -121,11 +121,11 @@ def main():
                 stabile_pose.append(ps_stb.state[0])
             stabile_pose = np.reshape(stabile_pose, (-1, 3))
 
-            # Uncomment following line to draw pose annotaion on frame.
+            # Uncomment following line to draw pose annotation on frame.
             # pose_estimator.draw_annotation_box(
             #     frame, pose[0], pose[1], color=(255, 128, 128))
 
-            # Uncomment following line to draw stabile pose annotaion on frame.
+            # Uncomment following line to draw stabile pose annotation on frame.
             pose_estimator.draw_annotation_box(
                 frame, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
 
