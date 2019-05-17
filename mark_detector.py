@@ -63,25 +63,24 @@ class FaceDetector:
 class MarkDetector:
     """Facial landmark detector by Convolutional Neural Network"""
 
-    def __init__(self, mark_model='assets/frozen_inference_graph.pb'):
+    def __init__(self, saved_model='assets/pose_model'):
         """Initialization"""
         # A face detector is required for mark detection.
         self.face_detector = FaceDetector()
 
-        self.cnn_input_size = 128
+        self.cnn_input_size = 112
         self.marks = None
 
         # Get a TensorFlow session ready to do landmark detection
-        # Load a (frozen) Tensorflow model into memory.
-        detection_graph = tf.Graph()
-        with detection_graph.as_default():
-            od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(mark_model, 'rb') as fid:
-                serialized_graph = fid.read()
-                od_graph_def.ParseFromString(serialized_graph)
-                tf.import_graph_def(od_graph_def, name='')
-        self.graph = detection_graph
-        self.sess = tf.Session(graph=detection_graph)
+        # Load a Tensorflow saved model into memory.
+        self.graph = tf.Graph()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        self.sess = tf.Session(graph=self.graph, config=config)
+
+        # Restore model from the saved_model file, that is exported by
+        # TensorFlow estimator.
+        tf.saved_model.loader.load(self.sess, ["serve"], saved_model)
 
     @staticmethod
     def draw_box(image, boxes, box_color=(255, 255, 255)):
@@ -162,18 +161,20 @@ class MarkDetector:
     def detect_marks(self, image_np):
         """Detect marks from image"""
         # Get result tensor by its name.
-        logits_tensor = self.graph.get_tensor_by_name('logits/BiasAdd:0')
+        logits_tensor = self.graph.get_tensor_by_name(
+            'resnet_model/final_dense:0')
 
         # Actual detection.
         predictions = self.sess.run(
             logits_tensor,
-            feed_dict={'input_image_tensor:0': image_np})
+            feed_dict={'input_tensor:0': image_np})
 
         # Convert predictions to landmarks.
-        marks = np.array(predictions).flatten()
+        marks = np.array(predictions).flatten()[:136]
         marks = np.reshape(marks, (-1, 2))
+        pose = np.array(predictions).flatten()[-3:]
 
-        return marks
+        return marks, pose
 
     @staticmethod
     def draw_marks(image, marks, color=(255, 255, 255)):
