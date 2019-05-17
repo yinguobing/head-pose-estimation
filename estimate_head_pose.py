@@ -20,7 +20,7 @@ from stabilizer import Stabilizer
 # multiprocessing may not work on Windows and macOS, check OS for safety.
 detect_os()
 
-CNN_INPUT_SIZE = 128
+CNN_INPUT_SIZE = 112
 
 
 def get_face(detector, img_queue, box_queue):
@@ -97,9 +97,10 @@ def main():
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
 
             tm.start()
-            marks = mark_detector.detect_marks(face_img)
+            marks, pose = mark_detector.detect_marks([face_img])
             tm.stop()
-            print(tm.getTimeSec()/tm.count())
+            pose *= 180
+            print("{:.2f}, {:.2f}, {:.2f}".format(pose[0], pose[1], pose[2]))
 
             # Convert the marks locations from local CNN to global image.
             marks *= (facebox[2] - facebox[0])
@@ -107,8 +108,9 @@ def main():
             marks[:, 1] += facebox[1]
 
             # Uncomment following line to show raw marks.
-            # mark_detector.draw_marks(
-            #     frame, marks, color=(0, 255, 0))
+            mark_detector.draw_marks(
+                frame, marks, color=(0, 255, 0))
+            
 
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
