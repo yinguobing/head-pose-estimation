@@ -1,4 +1,4 @@
-"""Human facial landmark detector based on Convulutional Neural Network."""
+"""Human facial landmark detector based on Convolutional Neural Network."""
 import numpy as np
 import tensorflow as tf
 
