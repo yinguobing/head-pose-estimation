@@ -162,6 +162,10 @@ class PoseEstimator:
         img = cv2.line(img, tuple(axisPoints[3].ravel()), tuple(
             axisPoints[2].ravel()), (0, 0, 255), 3)
 
+    def draw_axes(self, img, R, t):
+        img	= cv2.drawFrameAxes(img, self.camera_matrix, self.dist_coeefs, R, t, 30)
+
+
     def get_pose_marks(self, marks):
         """Get marks ready for pose estimation from 68 marks"""
         pose_marks = []
