@@ -88,7 +88,7 @@ class MarkDetector:
         for box in boxes:
             cv2.rectangle(image,
                           (box[0], box[1]),
-                          (box[2], box[3]), box_color)
+                          (box[2], box[3]), box_color, 3)
 
     @staticmethod
     def move_box(box, offset):
@@ -146,8 +146,8 @@ class MarkDetector:
 
         for box in raw_boxes:
             # Move box down.
-            diff_height_width = (box[3] - box[1]) - (box[2] - box[0])
-            offset_y = int(abs(diff_height_width / 2))
+            # diff_height_width = (box[3] - box[1]) - (box[2] - box[0])
+            offset_y = int(abs((box[3] - box[1]) * 0.1))
             box_moved = self.move_box(box, [0, offset_y])
 
             # Make box square.
