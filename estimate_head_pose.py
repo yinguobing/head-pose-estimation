@@ -5,17 +5,21 @@ detection. The facial landmark detection is done by a custom Convolutional
 Neural Network trained with TensorFlow. After that, head pose is estimated
 by solving a PnP problem.
 """
+
+
 from multiprocessing import Process, Queue
 
-import numpy as np
-
 import cv2
-print("OpenCV version: {}".format(cv2.__version__))
+import numpy as np
 
 from mark_detector import MarkDetector
 from os_detector import detect_os
 from pose_estimator import PoseEstimator
 from stabilizer import Stabilizer
+
+
+print("OpenCV version: {}".format(cv2.__version__))
+
 
 # multiprocessing may not work on Windows and macOS, check OS for safety.
 detect_os()
@@ -96,6 +100,8 @@ def main():
             face_img = cv2.resize(face_img, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
 
+            cv2.imshow("Face", face_img)
+
             tm.start()
             marks, pose = mark_detector.detect_marks([face_img])
             tm.stop()
@@ -110,7 +116,7 @@ def main():
             # Uncomment following line to show raw marks.
             mark_detector.draw_marks(
                 frame, marks, color=(0, 255, 0))
-            
+            mark_detector.draw_box(frame, [facebox])
 
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
@@ -130,6 +136,7 @@ def main():
             # Uncomment following line to draw stabile pose annotation on frame.
             pose_estimator.draw_annotation_box(
                 frame, stabile_pose[0], stabile_pose[1], color=(128, 255, 128))
+            pose_estimator.draw_axes(frame, stabile_pose[0], stabile_pose[1])
 
         # Show preview.
         cv2.imshow("Preview", frame)
