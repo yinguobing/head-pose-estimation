@@ -70,6 +70,3 @@ The 3D model of face comes from OpenFace, you can find the original file [here](
 
 The build in face detector comes from OpenCV. 
 https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
-
-## Finally
-If you are interested in Deep Learning and happened to be seeking for a job opportunity, feel free to get in touch.
