@@ -5,8 +5,7 @@ detection. The facial landmark detection is done by a custom Convolutional
 Neural Network trained with TensorFlow. After that, head pose is estimated
 by solving a PnP problem.
 """
-
-
+from argparse import ArgumentParser
 from multiprocessing import Process, Queue
 
 import cv2
@@ -17,14 +16,20 @@ from os_detector import detect_os
 from pose_estimator import PoseEstimator
 from stabilizer import Stabilizer
 
-
 print("OpenCV version: {}".format(cv2.__version__))
-
 
 # multiprocessing may not work on Windows and macOS, check OS for safety.
 detect_os()
 
 CNN_INPUT_SIZE = 128
+
+# Take arguments from user input.
+parser = ArgumentParser()
+parser.add_argument("--video", type=str, default=None,
+                    help="Video file to be processed.")
+parser.add_argument("--cam", type=int, default=None,
+                    help="The webcam index.")
+args = parser.parse_args()
 
 
 def get_face(detector, img_queue, box_queue):
@@ -38,11 +43,15 @@ def get_face(detector, img_queue, box_queue):
 def main():
     """MAIN"""
     # Video source from webcam or video file.
-    video_src = 0
-    cam = cv2.VideoCapture(video_src)
+    video_src = args.cam if args.cam is not None else args.video
+    if video_src is None:
+        print("Warning: video source not assigned, default webcam will be used.")
+        video_src = 0
+
+    cap = cv2.VideoCapture(video_src)
     if video_src == 0:
-        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    _, sample_frame = cam.read()
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    _, sample_frame = cap.read()
 
     # Introduce mark_detector to detect landmarks.
     mark_detector = MarkDetector()
@@ -71,7 +80,7 @@ def main():
 
     while True:
         # Read frame, crop it, flip it, suits your needs.
-        frame_got, frame = cam.read()
+        frame_got, frame = cap.read()
         if frame_got is False:
             break
 
