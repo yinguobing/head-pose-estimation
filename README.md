@@ -7,34 +7,42 @@ This repo shows how to estimate human head pose from videos using TensorFlow and
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+The following packages are required:
 
-### Prerequisites
-
-- TensorFlow 1.4. It seems v1.12 also works.
+- TensorFlow 1.14.
 - OpenCV 3.3 or higher.
 - Python 3.5
 
-The code is tested under Ubuntu 16.04.
+The code is tested on Ubuntu 16.04.
 
-### Installing
+## Installing
 
 This repository comes with a pre-trained model for facial landmark detection. Just git clone then you are good to go.
 
 ```bash
-# From the directory where you want to put this project:
+# From your favorite development directory:
 git clone https://github.com/yinguobing/head-pose-estimation.git
 ```
 
-### Running
-The entrance file is `estimate_head_pose.py`. This will use your usb camera as the video source for demonstration.
+## Running
+
+A video file or a webcam index should be assigned through arguments. If no source provided, the default webcam will be used.
+
+### For video file
+
+For any video format that OpenCV supported (`mp4`, `avi` etc.):
 
 ```bash
-# From the project directory, run:
-python3 estimate_head_pose.py
+python3 estimate_head_pose.py --video /path/to/video.mp4
 ```
 
-You can change the video source to any video file that OpenCV supports.
+### For webcam
+
+The webcam index should be assigned:
+
+```bash
+python3 estimate_head_pose.py --cam 0
+``` 
 
 ## How it works
 
@@ -50,7 +58,7 @@ The marks is detected frame by frame, which result in small variance between adj
 
 ## Retrain the model
 
-To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only).
+To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only). And the training code is also open sourced: https://github.com/yinguobing/cnn-facial-landmark
 
 
 ## License
