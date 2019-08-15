@@ -1,8 +1,7 @@
 """Human facial landmark detector based on Convolutional Neural Network."""
+import cv2
 import numpy as np
 import tensorflow as tf
-
-import cv2
 
 
 class FaceDetector:
@@ -68,7 +67,7 @@ class MarkDetector:
         # A face detector is required for mark detection.
         self.face_detector = FaceDetector()
 
-        self.cnn_input_size = 112
+        self.cnn_input_size = 128
         self.marks = None
 
         # Get a TensorFlow session ready to do landmark detection
@@ -162,19 +161,18 @@ class MarkDetector:
         """Detect marks from image"""
         # Get result tensor by its name.
         logits_tensor = self.graph.get_tensor_by_name(
-            'resnet_model/final_dense:0')
+            'layer6/final_dense:0')
 
         # Actual detection.
         predictions = self.sess.run(
             logits_tensor,
-            feed_dict={'input_tensor:0': image_np})
+            feed_dict={'image_tensor:0': image_np})
 
         # Convert predictions to landmarks.
         marks = np.array(predictions).flatten()[:136]
         marks = np.reshape(marks, (-1, 2))
-        pose = np.array(predictions).flatten()[-3:]
 
-        return marks, pose
+        return marks
 
     @staticmethod
     def draw_marks(image, marks, color=(255, 255, 255)):
