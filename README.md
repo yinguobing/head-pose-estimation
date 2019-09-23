@@ -2,8 +2,8 @@
 
 This repo shows how to estimate human head pose from videos using TensorFlow and OpenCV.
 
-![demo](https://github.com/yinguobing/head-pose-estimation/raw/master/demo.gif)
-![demo](https://github.com/yinguobing/head-pose-estimation/raw/master/demo1.gif)
+![demo](doc/demo.gif)
+![demo](doc/demo1.gif)
 
 ## Getting Started
 
@@ -63,6 +63,11 @@ To reproduce the facial landmark detection model, you can refer to this [series]
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Authors
+Yin Guobing (尹国冰) - [yinguobing](https://yinguobing.com)
+
+![](doc/wechat_logo.png)
 
 ## Acknowledgments
 The pre-trained TensorFlow model file is trained with various public data sets which have their own licenses. Please refer to them before using this code.
