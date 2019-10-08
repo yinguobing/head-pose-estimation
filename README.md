@@ -1,3 +1,5 @@
+*我正在找工作。预计从10月14日开始，会依次经过杭州、厦门、广州与深圳四个城市。欢迎有工作机会的小伙伴联系！yinguobing@gmail.com*
+
 # Head pose estimation
 
 This repo shows how to estimate human head pose from videos using TensorFlow and OpenCV.
