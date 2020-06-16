@@ -7,6 +7,8 @@ This repo shows how to estimate human head pose from videos using TensorFlow and
 
 ## Getting Started
 
+:information_source:  *Checkout branch `tf2` if you are using TensorFlow 2*
+
 The following packages are required:
 
 - TensorFlow 1.14.
