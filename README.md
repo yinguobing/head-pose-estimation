@@ -9,11 +9,11 @@ This repo shows how to estimate human head pose from videos using TensorFlow and
 
 The following packages are required:
 
-- TensorFlow 1.14.
-- OpenCV 3.3 or higher.
-- Python 3.5
+- TensorFlow 2.2
+- OpenCV 4.3
+- Python 3.6
 
-The code is tested on Ubuntu 16.04.
+The code is tested in Ubuntu 18.04.
 
 ## Installing
 
