@@ -2,6 +2,7 @@
 import cv2
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 
 
 class FaceDetector:
@@ -70,16 +71,8 @@ class MarkDetector:
         self.cnn_input_size = 128
         self.marks = None
 
-        # Get a TensorFlow session ready to do landmark detection
-        # Load a Tensorflow saved model into memory.
-        self.graph = tf.Graph()
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        self.sess = tf.Session(graph=self.graph, config=config)
-
-        # Restore model from the saved_model file, that is exported by
-        # TensorFlow estimator.
-        tf.saved_model.loader.load(self.sess, ["serve"], saved_model)
+        # Restore model from the saved_model file.
+        self.model = keras.models.load_model(saved_model)
 
     @staticmethod
     def draw_box(image, boxes, box_color=(255, 255, 255)):
@@ -159,17 +152,13 @@ class MarkDetector:
 
     def detect_marks(self, image_np):
         """Detect marks from image"""
-        # Get result tensor by its name.
-        logits_tensor = self.graph.get_tensor_by_name(
-            'layer6/final_dense:0')
 
-        # Actual detection.
-        predictions = self.sess.run(
-            logits_tensor,
-            feed_dict={'image_tensor:0': image_np})
+        # # Actual detection.
+        predictions = self.model.signatures["predict"](
+            tf.constant(image_np, dtype=tf.uint8))
 
         # Convert predictions to landmarks.
-        marks = np.array(predictions).flatten()[:136]
+        marks = np.array(predictions['output']).flatten()[:136]
         marks = np.reshape(marks, (-1, 2))
 
         return marks
