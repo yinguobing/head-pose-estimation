@@ -1,5 +1,5 @@
 """
-Using Kalman Filter as a point stabilizer to stabiliz a 2D point.
+Using Kalman Filter as a point stabilizer to stabilize a 2D point.
 """
 import numpy as np
 
@@ -77,7 +77,7 @@ class Stabilizer:
             self.measurement = np.array([[np.float32(measurement[0])],
                                          [np.float32(measurement[1])]])
 
-        # Correct according to mesurement
+        # Correct according to measurement
         self.filter.correct(self.measurement)
 
         # Update state value.
