@@ -122,7 +122,7 @@ def main():
             # mark_detector.draw_marks(frame, marks, color=(0, 255, 0))
 
             # Uncomment following line to show facebox.
-            mark_detector.draw_box(frame, [facebox])
+            # mark_detector.draw_box(frame, [facebox])
 
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
