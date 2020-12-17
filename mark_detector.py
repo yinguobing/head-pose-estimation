@@ -138,8 +138,7 @@ class MarkDetector:
 
         for box in raw_boxes:
             # Move box down.
-            # diff_height_width = (box[3] - box[1]) - (box[2] - box[0])
-            offset_y = int(abs((box[3] - box[1]) * 0.1))
+            offset_y = int(abs((box[3] - box[1]) * 0.12))
             box_moved = self.move_box(box, [0, offset_y])
 
             # Make box square.
@@ -150,15 +149,13 @@ class MarkDetector:
 
         return None
 
-    def detect_marks(self, image_np):
-        """Detect marks from image"""
+    def detect_marks(self, images):
+        """Detect marks from images"""
 
         # # Actual detection.
-        predictions = self.model.signatures["predict"](
-            tf.constant(image_np, dtype=tf.uint8))
+        marks = self.model.predict(tf.expand_dims(images, axis=0))
 
         # Convert predictions to landmarks.
-        marks = np.array(predictions['output']).flatten()[:136]
         marks = np.reshape(marks, (-1, 2))
 
         return marks
