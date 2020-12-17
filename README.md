@@ -1,23 +1,25 @@
 # Head pose estimation
 
-This repo shows how to estimate human head pose from videos using TensorFlow and OpenCV.
+Real time human head pose estimation using TensorFlow and OpenCV.
 
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
 
 ## Getting Started
 
-The following packages are required:
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-- TensorFlow 2.2
-- OpenCV 4.3
-- Python 3.6
+### Prerequisites
 
-The code is tested in Ubuntu 18.04.
+![TensorFlow](https://img.shields.io/badge/TensorFlow-v2.4-brightgreen)
+![OpenCV](https://img.shields.io/badge/OpenCV-v4.5-brightgreen)
+![Numpy](https://img.shields.io/badge/Numpy-v1.19-brightgreen)
 
-## Installing
+The code was tested on Ubuntu 20.04.
 
-This repository comes with a pre-trained model for facial landmark detection. Just git clone then you are good to go.
+### Installing
+
+This repository already provided a pre-trained model for facial landmarks detection. Just git clone then you are good to go.
 
 ```bash
 # From your favorite development directory:
@@ -26,19 +28,19 @@ git clone https://github.com/yinguobing/head-pose-estimation.git
 
 ## Running
 
-A video file or a webcam index should be assigned through arguments. If no source provided, the default webcam will be used.
+A video file or a webcam index should be assigned through arguments. If no source provided, the built in webcam will be used by default.
 
-### For video file
+### With video file
 
-For any video format that OpenCV supported (`mp4`, `avi` etc.):
+For any video format that OpenCV supports (`mp4`, `avi` etc.):
 
 ```bash
 python3 estimate_head_pose.py --video /path/to/video.mp4
 ```
 
-### For webcam
+### With webcam
 
-The webcam index should be assigned:
+The webcam index should be provided:
 
 ```bash
 python3 estimate_head_pose.py --cam 0
@@ -48,17 +50,18 @@ python3 estimate_head_pose.py --cam 0
 
 There are three major steps:
 
-1. Face detection. A face detector is adopted to provide a face box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
+1. Face detection. A face detector is introduced to provide a face bounding box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
 
-2. Facial landmark detection. A custom trained facial landmark detector based on TensorFlow is responsible for output 68 facial landmarks.
+2. Facial landmark detection. A pre-trained deep learning model take the face image as input and output 68 facial landmarks.
 
-3. Pose estimation. Once we got the 68 facial landmarks, a mutual PnP algorithms is adopted to calculate the pose.
+3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
 
-The marks is detected frame by frame, which result in small variance between adjacent frames. This makes the pose unstable. A Kalman filter is used to solve this problem, you can draw the original pose to observe the difference.
+The marks are detected frame by frame that makes the pose unstable. A Kalman filter is used to solve this problem, you can draw the original pose to observe the difference.
 
 ## Retrain the model
 
-To reproduce the facial landmark detection model, you can refer to this [series](https://yinguobing.com/deeplearning/) of posts(in Chinese only). And the training code is also open sourced: https://github.com/yinguobing/cnn-facial-landmark
+To retrain the facial landmark detection model please refer to this series of [posts]((https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: 
+https://github.com/yinguobing/cnn-facial-landmark
 
 
 ## License
