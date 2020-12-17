@@ -110,7 +110,7 @@ def main():
             face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
 
             tm.start()
-            marks = mark_detector.detect_marks([face_img])
+            marks = mark_detector.detect_marks(face_img)
             tm.stop()
 
             # Convert the marks locations from local CNN to global image.
@@ -119,11 +119,10 @@ def main():
             marks[:, 1] += facebox[1]
 
             # Uncomment following line to show raw marks.
-            # mark_detector.draw_marks(
-            #     frame, marks, color=(0, 255, 0))
+            # mark_detector.draw_marks(frame, marks, color=(0, 255, 0))
 
             # Uncomment following line to show facebox.
-            # mark_detector.draw_box(frame, [facebox])
+            mark_detector.draw_box(frame, [facebox])
 
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
@@ -145,7 +144,7 @@ def main():
                 frame, steady_pose[0], steady_pose[1], color=(128, 255, 128))
 
             # Uncomment following line to draw head axes on frame.
-            # pose_estimator.draw_axes(frame, stabile_pose[0], stabile_pose[1])
+            # pose_estimator.draw_axes(frame, steady_pose[0], steady_pose[1])
 
         # Show preview.
         cv2.imshow("Preview", frame)
