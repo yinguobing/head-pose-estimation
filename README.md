@@ -60,7 +60,7 @@ The marks are detected frame by frame that makes the pose unstable. A Kalman fil
 
 ## Retrain the model
 
-To retrain the facial landmark detection model please refer to this series of [posts]((https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: 
+To retrain the facial landmark detection model please refer to this series of [posts](https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: 
 https://github.com/yinguobing/cnn-facial-landmark
 
 
