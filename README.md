@@ -15,7 +15,7 @@ These instructions will get you a copy of the project up and running on your loc
 ![OpenCV](https://img.shields.io/badge/OpenCV-v4.5-brightgreen)
 ![Numpy](https://img.shields.io/badge/Numpy-v1.19-brightgreen)
 
-The code was tested on Ubuntu 20.04.
+The code was tested on Ubuntu 20.04 and macOS Big Sur.
 
 ### Installing
 
@@ -35,7 +35,7 @@ A video file or a webcam index should be assigned through arguments. If no sourc
 For any video format that OpenCV supports (`mp4`, `avi` etc.):
 
 ```bash
-python3 estimate_head_pose.py --video /path/to/video.mp4
+python3 main.py --video /path/to/video.mp4
 ```
 
 ### With webcam
@@ -43,7 +43,7 @@ python3 estimate_head_pose.py --video /path/to/video.mp4
 The webcam index should be provided:
 
 ```bash
-python3 estimate_head_pose.py --cam 0
+python3 main.py --cam 0
 ``` 
 
 ## How it works
@@ -56,12 +56,9 @@ There are three major steps:
 
 3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
 
-The marks are detected frame by frame that makes the pose unstable. A Kalman filter is used to solve this problem, you can draw the original pose to observe the difference.
-
 ## Retrain the model
 
-To retrain the facial landmark detection model please refer to this series of [posts](https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: 
-https://github.com/yinguobing/cnn-facial-landmark
+To retrain the facial landmark detection model, please refer to this series of [posts](https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: https://github.com/yinguobing/cnn-facial-landmark
 
 
 ## License
