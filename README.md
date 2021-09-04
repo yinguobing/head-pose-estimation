@@ -23,7 +23,7 @@ This repository already provided a pre-trained model for facial landmarks detect
 
 ```bash
 # From your favorite development directory:
-git clone https://github.com/yinguobing/head-pose-estimation.git
+git clone --depth=1 https://github.com/yinguobing/head-pose-estimation.git
 ```
 
 ## Running
