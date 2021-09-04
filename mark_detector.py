@@ -149,11 +149,22 @@ class MarkDetector:
 
         return None
 
-    def detect_marks(self, images):
-        """Detect marks from images"""
+    def detect_marks(self, image):
+        """Detect facial marks from an face image.
+        
+        Args:
+            image: a face image.
+            
+        Returns:
+            marks: the facial marks as a numpy array of shape [N, 2].
+        """
+        # Resize the image into fix size.
+        image = cv2.resize(image, (128, 128))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        inputs = tf.expand_dims(image, axis=0)
 
-        # # Actual detection.
-        marks = self.model.predict(tf.expand_dims(images, axis=0))
+        # Actual detection.
+        marks = self.model.predict(inputs)
 
         # Convert predictions to landmarks.
         marks = np.reshape(marks, (-1, 2))
