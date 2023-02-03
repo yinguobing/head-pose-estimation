@@ -129,7 +129,7 @@ class PoseEstimator:
         point_3d.append((front_size, front_size, front_depth))
         point_3d.append((front_size, -front_size, front_depth))
         point_3d.append((-front_size, -front_size, front_depth))
-        point_3d = np.array(point_3d, dtype=np.float).reshape(-1, 3)
+        point_3d = np.array(point_3d, dtype=np.float32).reshape(-1, 3)
 
         # Map to 2d image points
         (point_2d, _) = cv2.projectPoints(point_3d,
