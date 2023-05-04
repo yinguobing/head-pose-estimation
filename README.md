@@ -5,6 +5,10 @@ Real time human head pose estimation using TensorFlow and OpenCV.
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
 
+Features comming soon:
+- Train with PyTorch
+- Inference with ONNXRuntime
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
