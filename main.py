@@ -47,7 +47,7 @@ def run():
         "assets/face_detection_yunet_2022mar.onnx", [frame_width, frame_height])
 
     # Setup a mark detector to detect landmarks.
-    mark_detector = MarkDetector("assets/pose_model")
+    mark_detector = MarkDetector("assets/facemarks.onnx")
 
     # Setup a pose estimator to solve pose.
     pose_estimator = PoseEstimator(img_size=(frame_height, frame_width))
@@ -85,7 +85,7 @@ def run():
                 patches.append(patch)
 
             # Run the detection.
-            marks = mark_detector.detect(patches).reshape([num_faces, -1])
+            marks = mark_detector.detect(patches)
 
             # Convert the locations from local face area to the global image.
             marks *= refined[:, 2, None]
