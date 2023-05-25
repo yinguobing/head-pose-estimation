@@ -1,7 +1,7 @@
 """Human facial landmark detector based on Convolutional Neural Network."""
 import cv2
-import tensorflow as tf
-from tensorflow import keras
+import numpy as np
+import onnxruntime as ort
 
 
 class MarkDetector:
@@ -11,7 +11,8 @@ class MarkDetector:
         self._input_size = 128
 
         # Restore model from the saved_model file.
-        self._model = keras.models.load_model(saved_model)
+        self.model = ort.InferenceSession(
+            saved_model, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
 
     def _preprocess(self, bgrs):
         """Preprocess the inputs to meet the model's needs.
@@ -28,7 +29,7 @@ class MarkDetector:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             rgbs.append(img)
 
-        return tf.convert_to_tensor(rgbs)
+        return rgbs
 
     def detect(self, images):
         """Detect facial marks from an face image.
@@ -40,8 +41,8 @@ class MarkDetector:
             marks: the facial marks as a numpy array of shape [Batch, 68*2].
         """
         inputs = self._preprocess(images)
-        marks = self._model.predict(inputs)
-        return marks
+        marks = self.model.run(["dense_1"], {"image_input": inputs})
+        return np.array(marks)
 
     def visualize(self, image, marks, color=(255, 255, 255)):
         """Draw mark points on image"""
