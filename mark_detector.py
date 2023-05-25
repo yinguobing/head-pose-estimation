@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+import onnxruntime as ort
 
 
 class FaceDetector:
@@ -63,7 +64,7 @@ class FaceDetector:
 class MarkDetector:
     """Facial landmark detector by Convolutional Neural Network"""
 
-    def __init__(self, saved_model='assets/pose_model'):
+    def __init__(self, saved_model='assets/facemarks.onnx'):
         """Initialization"""
         # A face detector is required for mark detection.
         self.face_detector = FaceDetector()
@@ -72,7 +73,9 @@ class MarkDetector:
         self.marks = None
 
         # Restore model from the saved_model file.
-        self.model = keras.models.load_model(saved_model)
+        # self.model = keras.models.load_model(saved_model)
+        self.model = ort.InferenceSession(
+            saved_model, providers=["CUDAExecutionProvider"])
 
     @staticmethod
     def draw_box(image, boxes, box_color=(255, 255, 255)):
@@ -151,20 +154,21 @@ class MarkDetector:
 
     def detect_marks(self, image):
         """Detect facial marks from an face image.
-        
+
         Args:
             image: a face image.
-            
+
         Returns:
             marks: the facial marks as a numpy array of shape [N, 2].
         """
         # Resize the image into fix size.
         image = cv2.resize(image, (128, 128))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        inputs = tf.expand_dims(image, axis=0)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+        # inputs = tf.expand_dims(image, axis=0)
+        # inputs = np.transpose(inputs, [0, 3, 1, 2])
 
         # Actual detection.
-        marks = self.model.predict(inputs)
+        marks = self.model.run(["dense_1"], {"image_input": [image]})
 
         # Convert predictions to landmarks.
         marks = np.reshape(marks, (-1, 2))
