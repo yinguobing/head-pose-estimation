@@ -19,9 +19,9 @@ def refine(boxes, max_width, max_height, shift=0.1):
     refined[:, 3] = _square_sizes
 
     # Clip the boxes for safety
-    np.clip(refined[:, 0], 0, max_width)
-    np.clip(refined[:, 1], 0, max_height)
-    np.clip(refined[:, 2], 0, max_width)
-    np.clip(refined[:, 3], 0, max_height)
+    refined[:, 0] = np.clip(refined[:, 0], 0, max_width)
+    refined[:, 1] = np.clip(refined[:, 1], 0, max_height)
+    refined[:, 2] = np.clip(refined[:, 2], 0, max_width)
+    refined[:, 3] = np.clip(refined[:, 3], 0, max_height)
 
     return refined
