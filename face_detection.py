@@ -1,5 +1,6 @@
 """This module provides a face detection implementation backed by YuNet.
-Original code: https://github.com/opencv/opencv_zoo/tree/master/models/face_detection_yunet
+The ONNX model file could be find here:
+https://github.com/opencv/opencv_zoo/tree/master/models/face_detection_yunet
 """
 import numpy as np
 import cv2
@@ -67,11 +68,7 @@ class FaceDetector:
             results (np.ndarray): face detection results.
             box_color (tuple, optional): color of the face box. Defaults to (0, 255, 0).
             text_color (tuple, optional): color of the face marks (5 points). Defaults to (0, 0, 255).
-
-        Returns:
-            np.ndarray: image with mark drawings.
         """
-        output = image.copy()
         for det in results:
             bbox = det[0:4].astype(np.int32)
             conf = det[-1]
@@ -86,5 +83,3 @@ class FaceDetector:
                           box_color, cv2.FILLED)
             cv2.putText(image, label, (bbox[0], bbox[1]),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color)
-
-        return output
