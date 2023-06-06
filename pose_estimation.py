@@ -14,17 +14,6 @@ class PoseEstimator:
             image_height (int): input image height
         """
         self.size = (image_height, image_width)
-
-        # 3D model points.
-        self.model_points = np.array([
-            (0.0, 0.0, 0.0),             # Nose tip
-            (0.0, -330.0, -65.0),        # Chin
-            (-225.0, 170.0, -135.0),     # Left eye left corner
-            (225.0, 170.0, -135.0),      # Right eye right corner
-            (-150.0, -150.0, -125.0),    # Mouth left corner
-            (150.0, -150.0, -125.0)      # Mouth right corner
-        ]) / 4.5
-
         self.model_points_68 = self._get_full_model_points()
 
         # Camera internals
@@ -57,47 +46,24 @@ class PoseEstimator:
 
         return model_points
 
-    def show_3d_model(self):
-        from matplotlib import pyplot
-        from mpl_toolkits.mplot3d import Axes3D
-        fig = pyplot.figure()
-        ax = Axes3D(fig)
+    def solve(self, points):
+        """Solve pose with all the 68 image points
+        Args:
+            points (np.ndarray): points on image.
 
-        x = self.model_points_68[:, 0]
-        y = self.model_points_68[:, 1]
-        z = self.model_points_68[:, 2]
-
-        ax.scatter(x, y, z)
-        ax.axis('square')
-        pyplot.xlabel('x')
-        pyplot.ylabel('y')
-        pyplot.show()
-
-    def solve_pose(self, image_points):
-        """
-        Solve pose from image points
-        Return (rotation_vector, translation_vector) as pose.
-        """
-        assert image_points.shape[0] == self.model_points_68.shape[0], "3D points and 2D points should be of same number."
-        (_, rotation_vector, translation_vector) = cv2.solvePnP(
-            self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
-        return (rotation_vector, translation_vector)
-
-    def solve_pose_by_68_points(self, image_points):
-        """
-        Solve pose from all the 68 image points
-        Return (rotation_vector, translation_vector) as pose.
+        Returns:
+            Tuple: (rotation_vector, translation_vector) as pose.
         """
 
         if self.r_vec is None:
             (_, rotation_vector, translation_vector) = cv2.solvePnP(
-                self.model_points_68, image_points, self.camera_matrix, self.dist_coeefs)
+                self.model_points_68, points, self.camera_matrix, self.dist_coeefs)
             self.r_vec = rotation_vector
             self.t_vec = translation_vector
 
         (_, rotation_vector, translation_vector) = cv2.solvePnP(
             self.model_points_68,
-            image_points,
+            points,
             self.camera_matrix,
             self.dist_coeefs,
             rvec=self.r_vec,
@@ -106,8 +72,9 @@ class PoseEstimator:
 
         return (rotation_vector, translation_vector)
 
-    def draw_annotation_box(self, image, rotation_vector, translation_vector, color=(255, 255, 255), line_width=2):
+    def visualize(self, image, pose, color=(255, 255, 255), line_width=2):
         """Draw a 3D box as annotation of pose"""
+        rotation_vector, translation_vector = pose
         point_3d = []
         rear_size = 75
         rear_depth = 0
@@ -143,31 +110,23 @@ class PoseEstimator:
         cv2.line(image, tuple(point_2d[3]), tuple(
             point_2d[8]), color, line_width, cv2.LINE_AA)
 
-    def draw_axis(self, img, R, t):
-        points = np.float32(
-            [[30, 0, 0], [0, 30, 0], [0, 0, 30], [0, 0, 0]]).reshape(-1, 3)
-
-        axisPoints, _ = cv2.projectPoints(
-            points, R, t, self.camera_matrix, self.dist_coeefs)
-
-        img = cv2.line(img, tuple(axisPoints[3].ravel()), tuple(
-            axisPoints[0].ravel()), (255, 0, 0), 3)
-        img = cv2.line(img, tuple(axisPoints[3].ravel()), tuple(
-            axisPoints[1].ravel()), (0, 255, 0), 3)
-        img = cv2.line(img, tuple(axisPoints[3].ravel()), tuple(
-            axisPoints[2].ravel()), (0, 0, 255), 3)
-
-    def draw_axes(self, img, R, t):
+    def draw_axes(self, img, pose):
+        R, t = pose
         img = cv2.drawFrameAxes(img, self.camera_matrix,
                                 self.dist_coeefs, R, t, 30)
 
-    def get_pose_marks(self, marks):
-        """Get marks ready for pose estimation from 68 marks"""
-        pose_marks = []
-        pose_marks.append(marks[30])    # Nose tip
-        pose_marks.append(marks[8])     # Chin
-        pose_marks.append(marks[36])    # Left eye left corner
-        pose_marks.append(marks[45])    # Right eye right corner
-        pose_marks.append(marks[48])    # Mouth left corner
-        pose_marks.append(marks[54])    # Mouth right corner
-        return pose_marks
+    def show_3d_model(self):
+        from matplotlib import pyplot
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = pyplot.figure()
+        ax = Axes3D(fig)
+
+        x = self.model_points_68[:, 0]
+        y = self.model_points_68[:, 1]
+        z = self.model_points_68[:, 2]
+
+        ax.scatter(x, y, z)
+        ax.axis('square')
+        pyplot.xlabel('x')
+        pyplot.ylabel('y')
+        pyplot.show()
