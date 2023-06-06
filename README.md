@@ -1,13 +1,21 @@
 # Head pose estimation
 
-Real time human head pose estimation using TensorFlow and OpenCV.
+Realtime human head pose estimation with ONNXRuntime and OpenCV.
 
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
 
-Features comming soon:
-- Train with PyTorch
-- Inference with ONNXRuntime
+
+## How it works
+
+There are three major steps:
+
+1. Face detection. A face detector is introduced to provide a face bounding box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
+
+2. Facial landmark detection. A pre-trained deep learning model take the face image as input and output 68 facial landmarks.
+
+3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
+
 
 ## Getting Started
 
@@ -15,20 +23,23 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-![TensorFlow](https://img.shields.io/badge/TensorFlow-v2.4-brightgreen)
-![OpenCV](https://img.shields.io/badge/OpenCV-v4.5-brightgreen)
-![Numpy](https://img.shields.io/badge/Numpy-v1.19-brightgreen)
-
-The code was tested on Ubuntu 20.04 and macOS Big Sur.
+The code was tested on Ubuntu 22.04 with following frameworks:
+- ONNXRuntime: 1.14.1
+- OpenCV: 4.5.4
 
 ### Installing
 
-This repository already provided a pre-trained model for facial landmarks detection. Just git clone then you are good to go.
-
+Clone the repo:
 ```bash
-# From your favorite development directory:
-git clone --depth=1 https://github.com/yinguobing/head-pose-estimation.git
+git clone https://github.com/yinguobing/head-pose-estimation.git
 ```
+
+Install dependencies with pip:
+```bash
+pip install -r requirements.txt
+```
+
+Note there are pre-trained models provided in the `assets` directory. 
 
 ## Running
 
@@ -50,22 +61,24 @@ The webcam index should be provided:
 python3 main.py --cam 0
 ``` 
 
-## How it works
-
-There are three major steps:
-
-1. Face detection. A face detector is introduced to provide a face bounding box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
-
-2. Facial landmark detection. A pre-trained deep learning model take the face image as input and output 68 facial landmarks.
-
-3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
-
 ## Retrain the model
 
-To retrain the facial landmark detection model, please refer to this series of [posts](https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: https://github.com/yinguobing/cnn-facial-landmark
+Tutorials: https://yinguobing.com/deeplearning/
+
+Training code: https://github.com/yinguobing/cnn-facial-landmark
+
+Note: PyTorch version coming soon!
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+
+Meanwhile: 
+
+- The face detector is [SCRFD](https://github.com/deepinsight/insightface/tree/master/detection/scrfd) from InsightFace. 
+
+- The pre-trained model file was trained with various public datasets which have their own licenses. 
+
+Please refer to them for details.
 
 ## Authors
 Yin Guobing (尹国冰) - [yinguobing](https://yinguobing.com)
@@ -73,8 +86,8 @@ Yin Guobing (尹国冰) - [yinguobing](https://yinguobing.com)
 ![](doc/wechat_logo.png)
 
 ## Acknowledgments
-The pre-trained TensorFlow model file is trained with various public data sets which have their own licenses. Please refer to them before using this code.
 
+All datasets used in the training process:
 - 300-W: https://ibug.doc.ic.ac.uk/resources/300-W/
 - 300-VW: https://ibug.doc.ic.ac.uk/resources/300-VW/
 - LFPW: https://neerajkumar.org/databases/lfpw/
@@ -82,7 +95,6 @@ The pre-trained TensorFlow model file is trained with various public data sets w
 - AFW: https://www.ics.uci.edu/~xzhu/face/
 - IBUG: https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/
 
-The 3D model of face comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
+The 3D face model is from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
 
-The build in face detector comes from OpenCV. 
-https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
+The build in face detector is [SCRFD](https://github.com/deepinsight/insightface/tree/master/detection/scrfd) from InsightFace. 
