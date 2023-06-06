@@ -11,11 +11,10 @@ https://github.com/yinguobing/head-pose-estimation
 from argparse import ArgumentParser
 
 import cv2
-import numpy as np
 
 from face_detection import FaceDetector
-from mark_detector import MarkDetector
-from pose_estimator import PoseEstimator
+from mark_detection import MarkDetector
+from pose_estimation import PoseEstimator
 from utils import refine
 
 # Parse arguments from user input.
@@ -85,12 +84,12 @@ def run():
             marks = mark_detector.detect([patch])[0].reshape([68, 2])
 
             # Convert the locations from local face area to the global image.
-            marks *= (face[2] - face[0])
-            marks[:, 0] += face[0]
-            marks[:, 1] += face[1]
+            marks *= (x2 - x1)
+            marks[:, 0] += x1
+            marks[:, 1] += y1
 
             # Step 3: Try pose estimation with 68 points.
-            pose = pose_estimator.solve_pose_by_68_points(marks)
+            pose = pose_estimator.solve(marks)
 
             tm.stop()
 
@@ -98,17 +97,16 @@ def run():
             # pose on the frame in realtime.
 
             # Do you want to see the pose annotation?
-            pose_estimator.draw_annotation_box(
-                frame, pose[0], pose[1], color=(0, 255, 0))
+            pose_estimator.visualize(frame, pose, color=(0, 255, 0))
 
             # Do you want to see the axes?
-            pose_estimator.draw_axes(frame, pose[0], pose[1])
+            # pose_estimator.draw_axes(frame, pose)
 
             # Do you want to see the marks?
-            mark_detector.visualize(frame, marks, color=(0, 255, 0))
+            # mark_detector.visualize(frame, marks, color=(0, 255, 0))
 
             # Do you want to see the face bounding boxes?
-            face_detector.visualize(frame, faces)
+            # face_detector.visualize(frame, faces)
 
         # Draw the FPS on screen.
         cv2.rectangle(frame, (0, 0), (90, 30), (0, 0, 0), cv2.FILLED)
