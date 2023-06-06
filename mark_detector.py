@@ -1,4 +1,6 @@
 """Human facial landmark detector based on Convolutional Neural Network."""
+import os
+
 import cv2
 import numpy as np
 import onnxruntime as ort
@@ -7,12 +9,16 @@ import onnxruntime as ort
 class MarkDetector:
     """Facial landmark detector by Convolutional Neural Network"""
 
-    def __init__(self, saved_model):
-        self._input_size = 128
+    def __init__(self, model_file):
+        """Initialize a mark detector.
 
-        # Restore model from the saved_model file.
+        Args:
+            model_file (str): ONNX model path.
+        """
+        assert os.path.exists(model_file), f"File not found: {model_file}"
+        self._input_size = 128
         self.model = ort.InferenceSession(
-            saved_model, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+            model_file, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
 
     def _preprocess(self, bgrs):
         """Preprocess the inputs to meet the model's needs.

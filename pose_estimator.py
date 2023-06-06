@@ -6,8 +6,14 @@ import numpy as np
 class PoseEstimator:
     """Estimate head pose according to the facial landmarks"""
 
-    def __init__(self, img_size=(480, 640)):
-        self.size = img_size
+    def __init__(self, image_width, image_height):
+        """Init a pose estimator.
+
+        Args:
+            image_width (int): input image width
+            image_height (int): input image height
+        """
+        self.size = (image_height, image_width)
 
         # 3D model points.
         self.model_points = np.array([
@@ -36,8 +42,6 @@ class PoseEstimator:
         self.r_vec = np.array([[0.01891013], [0.08560084], [-3.14392813]])
         self.t_vec = np.array(
             [[-14.97821226], [-10.62040383], [-2053.03596872]])
-        # self.r_vec = None
-        # self.t_vec = None
 
     def _get_full_model_points(self, filename='assets/model.txt'):
         """Get all 68 3D model points from file"""
@@ -77,15 +81,6 @@ class PoseEstimator:
         assert image_points.shape[0] == self.model_points_68.shape[0], "3D points and 2D points should be of same number."
         (_, rotation_vector, translation_vector) = cv2.solvePnP(
             self.model_points, image_points, self.camera_matrix, self.dist_coeefs)
-
-        # (success, rotation_vector, translation_vector) = cv2.solvePnP(
-        #     self.model_points,
-        #     image_points,
-        #     self.camera_matrix,
-        #     self.dist_coeefs,
-        #     rvec=self.r_vec,
-        #     tvec=self.t_vec,
-        #     useExtrinsicGuess=True)
         return (rotation_vector, translation_vector)
 
     def solve_pose_by_68_points(self, image_points):
@@ -163,8 +158,8 @@ class PoseEstimator:
             axisPoints[2].ravel()), (0, 0, 255), 3)
 
     def draw_axes(self, img, R, t):
-        img	= cv2.drawFrameAxes(img, self.camera_matrix, self.dist_coeefs, R, t, 30)
-
+        img = cv2.drawFrameAxes(img, self.camera_matrix,
+                                self.dist_coeefs, R, t, 30)
 
     def get_pose_marks(self, marks):
         """Get marks ready for pose estimation from 68 marks"""
