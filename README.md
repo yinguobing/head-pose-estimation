@@ -5,17 +5,13 @@ Realtime human head pose estimation with ONNXRuntime and OpenCV.
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
 
-
 ## How it works
 
 There are three major steps:
 
 1. Face detection. A face detector is introduced to provide a face bounding box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
-
 2. Facial landmark detection. A pre-trained deep learning model take the face image as input and output 68 facial landmarks.
-
 3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
-
 
 ## Getting Started
 
@@ -45,7 +41,7 @@ Note there are pre-trained models provided in the `assets` directory.
 
 A video file or a webcam index should be assigned through arguments. If no source provided, the built in webcam will be used by default.
 
-### With video file
+### Video file
 
 For any video format that OpenCV supports (`mp4`, `avi` etc.):
 
@@ -53,7 +49,7 @@ For any video format that OpenCV supports (`mp4`, `avi` etc.):
 python3 main.py --video /path/to/video.mp4
 ```
 
-### With webcam
+### Webcam
 
 The webcam index should be provided:
 
@@ -75,7 +71,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Meanwhile: 
 
 - The face detector is [SCRFD](https://github.com/deepinsight/insightface/tree/master/detection/scrfd) from InsightFace. 
-
 - The pre-trained model file was trained with various public datasets which have their own licenses. 
 
 Please refer to them for details.
