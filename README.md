@@ -1,6 +1,6 @@
 # Head pose estimation
 
-Realtime human head pose estimation with ONNXRuntime and OpenCV.
+Realtime human head pose estimation with ONNX Runtime and OpenCV.
 
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
@@ -20,7 +20,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 The code was tested on Ubuntu 22.04 with following frameworks:
-- ONNXRuntime: 1.14.1
+- ONNX Runtime: 1.17.1
 - OpenCV: 4.5.4
 
 ### Installing
@@ -35,7 +35,12 @@ Install dependencies with pip:
 pip install -r requirements.txt
 ```
 
-Note there are pre-trained models provided in the `assets` directory. 
+Pre-trained models provided in the `assets` directory. Download them with Git LFS:
+```bash
+git lfs pull
+```
+
+Or, download manually from the [release page](https://github.com/yinguobing/head-pose-estimation/releases).
 
 ## Running
 
